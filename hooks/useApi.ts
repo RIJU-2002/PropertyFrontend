@@ -1,6 +1,6 @@
 import { useQuery, useMutation, UseQueryResult, UseMutationResult } from '@tanstack/react-query'
 import axiosInstance from '@/lib/api/axios'
-import { Property, ApiResponse,GeocodeResponse } from '@/lib/api/types'
+import { Property, ApiResponse,GeocodeResponse,ProjectsResponse  } from '@/lib/api/types'
 
 // Properties
 export const useProperties = (params?: Record<string, any>): UseQueryResult<Property[], Error> =>
@@ -105,4 +105,12 @@ export const useGeocodeLocation = () =>
   });
 
 
-  
+ 
+export const useProjects = () =>
+  useQuery<ProjectsResponse>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ProjectsResponse>('/projects');
+      return data;
+    },
+  });

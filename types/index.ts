@@ -5,6 +5,10 @@ export type EnquiryStatus = 'New' | 'In Progress' | 'Contacted' | 'Site Visit' |
 export type LeadSource = 'Website' | 'Google Ad' | 'Facebook' | 'Referral' | 'Instagram' | 'Walk-in';
 export type PropertyType = 'Residential Apartment' | 'Villa' | 'Plot' | 'Commercial' | 'Mixed Use';
 export type ProjectPhase = 'New Launch' | 'Under Construction' | 'Ready to Move' | 'Sold Out';
+export type ProjectStats =
+  | "UNDER_CONSTRUCTION"
+  | "READY_TO_MOVE"
+  | "NEW_LAUNCH";
 
 export interface Configuration {
   type: string;         // e.g. "2 BHK"

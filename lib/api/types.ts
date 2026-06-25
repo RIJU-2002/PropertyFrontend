@@ -53,3 +53,61 @@ export interface GeocodeResponse {
   stateId: number | null;
   country: string | null;
 }
+
+
+
+
+export interface ProjectConfig {
+  id: number;
+  unitType: string;
+  buildAreaRange: string;
+  carpetArea: string;
+  bedRoom: string;
+  livingArea: string;
+  kitchen: string;
+  balconies: string;
+  floorHeight: string;
+  flooring: string;
+  facing: string;
+  pricePerArea: string;
+  price: string;
+  units: number;
+}
+
+import { ProjectStats } from '@/types/index';
+export interface Project {
+  id: number;
+  name: string;
+  slug: string;
+  possessionStatus: ProjectStats;
+
+  city: {
+    name: string;
+    slug: string;
+  };
+
+  locality: {
+    name: string;
+    slug: string;
+  };
+
+  configs: ProjectConfig[];
+
+  _count: {
+    properties: number;
+    leads: number;
+  };
+}
+
+export interface ProjectsResponse {
+  success: boolean;
+  projects: Project[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}

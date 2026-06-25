@@ -1,8 +1,15 @@
 import MetricCard from './MetricCard';
 import StatusBadge from './StatusBadge';
 import { mockDashboardMetrics, mockProjects, mockEnquiries } from '@/data/mockData';
+import { useProjects } from '@/hooks/useApi';
 
 export default function DashboardTab() {
+
+  const { data, isLoading } = useProjects();
+
+  const projects = data?.projects ?? [];
+  const pagination = data?.pagination;
+
   return (
     <div className="tab-content">
       {/* Metrics Grid */}
@@ -55,15 +62,36 @@ export default function DashboardTab() {
               </tr>
             </thead>
             <tbody>
-              {mockProjects.map((p) => (
+              {projects.map((p) => (
                 <tr key={p.id}>
-                  <td><strong>{p.name}</strong></td>
-                  <td>{p.location.split(',')[0]}</td>
-                  <td>{p.propertyType.replace(' Apartment', '')}</td>
-                  <td>{p.totalUnits}</td>
-                  <td>{p.availableUnits}</td>
-                  <td>{p.enquiries}</td>
-                  <td><StatusBadge status={p.status} /></td>
+                  <td>
+                    <strong>{p.name}</strong>
+                  </td>
+
+                  <td>
+                    {p.city.name}, {p.locality.name}
+                  </td>
+
+                  <td>
+                    {p.configs.map(c => c.unitType).join(", ")}
+                  </td>
+
+                  <td>
+                    {p.configs.reduce((sum, c) => sum + c.units, 0)}
+                  </td>
+
+                  <td>
+                    {p._count.properties}
+                  </td>
+
+                  <td>
+                    {p._count.leads}
+                  </td>
+
+                  <td>
+                    <StatusBadge status={p.possessionStatus} />
+                  </td>
+
                   <td>
                     <div className="action-btns">
                       <button className="action-btn">Edit</button>

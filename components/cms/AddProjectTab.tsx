@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useCreateProject,useAmenities,useGeocodeLocation } from '@/hooks/useApi'
+import { setDate } from 'date-fns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,24 @@ const INITIAL_FORM: FormData = {
   whatsappNumber: '+91 98XXX XXXXX',
 };
 
+const INITIAL_CONFIGS: Configuration[] = [
+  {
+    type: '2 BHK',
+    area: '875-1050',
+    carpetArea: '590-710 sq.ft.',
+    bedRoom: '2 BedRooms + 2 BathRooms',
+    livingArea: '240 sq.ft',
+    kitchen: 'Semi-modular with utility',
+    balconies: '1',
+    floorHeight: '10 ft',
+    flooring: 'Tiles',
+    facing: 'North',
+    pricePerArea: '₹7772-8000',
+    price: '₹68,00,000',
+    units: '60',
+  },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AddProjectTab({ onToast }: AddProjectTabProps) {
@@ -164,6 +183,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
 
     fd.append('launchDate', formData.launchDate);
     fd.append('possessionDate', formData.possessionDate);
+    fd.append('possessionStatus',formData.status);
 
     fd.append('metaTitle', formData.metaTitle);
     fd.append('metaDescription', formData.metaDesc);
@@ -297,6 +317,13 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
     createProject(fd, {
       onSuccess: (data) => {
         console.log(data);
+        // Reset form
+        setFormData(INITIAL_FORM);
+        setConfigs(INITIAL_CONFIGS);
+        setSelectedAmenityIds([]);
+        setImages([]);
+        setCustomAmenity('');
+        setWpAlerts(true);
         onToast('✅ Project created successfully');
       },
 
@@ -414,10 +441,9 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   value={formData.status}
                   onChange={e => update('status', e.target.value)}
                 >
-                  <option>New Launch</option>
-                  <option>Under Construction</option>
-                  <option>Ready to Move</option>
-                  <option>Sold Out</option>
+                  <option>NEW_LAUNCH</option>
+                  <option>UNDER_CONSTRUCTION</option>
+                  <option>READY_TO_MOVE</option>
                 </select>
               </div>
             </div>

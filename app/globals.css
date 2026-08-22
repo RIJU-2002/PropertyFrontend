@@ -75,8 +75,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Montserrat', 'Montserrat Fallback', sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-montserrat), 'Montserrat Fallback', sans-serif;
+  --font-mono: var(--font-mono), 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -119,7 +119,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans font-normal; /* Body: Regular */
+  }
+
+  h1 {
+    @apply font-sans font-semibold; /* H1: SemiBold */
+  }
+
+  h2,
+  h3 {
+    @apply font-sans font-medium; /* H2/H3: Medium */
+  }
+
+  nav,
+  nav a {
+    @apply font-sans font-medium; /* Navigation: Medium */
+  }
+
+  button {
+    @apply font-sans font-semibold; /* Buttons: SemiBold */
   }
 }

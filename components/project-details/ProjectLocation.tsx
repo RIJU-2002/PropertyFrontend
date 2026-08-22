@@ -1,74 +1,51 @@
 "use client";
 
-import styles from "@/app/page.module.css";
-import { NEARBY } from "@/data/projectData";
+import dynamic from "next/dynamic";
+import styles from "./ProjectLocation.module.css";
 
-export default function ProjectLocation() {
+const PropertyMap = dynamic(
+  () => import("@/components/project-details/PropertyMap"),
+  { ssr: false, loading: () => <div className={styles.mapSkeleton} /> }
+);
+
+interface Props {
+  project: {
+    name: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    address?: string | null;
+    locality?: { name: string };
+    city?: { name: string };
+  };
+}
+
+export default function ProjectLocation({ project }: Props) {
+  const hasCoords =
+    project.latitude != null &&
+    project.longitude != null &&
+    !Number.isNaN(project.latitude);
+
   return (
-    <section
-      className={styles.card}
-      id="location"
-    >
-      <div className={styles.cardHead}>
-        Location &
-        Connectivity
-      </div>
+    <section className={styles.section} id="location">
+      <h2 className={styles.heading}>Location</h2>
 
-      <div
-        className={
-          styles.locationMap
-        }
-      >
-        <div className={styles.mapPin}>
-          📍
+      {hasCoords ? (
+        <PropertyMap
+          propertyName={project.name}
+          center={{
+            lat: project.latitude!,
+            lng: project.longitude!,
+          }}
+        />
+      ) : (
+        <div className={styles.fallback}>
+          <p>📍 Map coming soon for this location.</p>
+          <span>
+            {project.address ||
+              `${project.locality?.name || ""}, ${project.city?.name || ""}`}
+          </span>
         </div>
-
-        <div className={styles.mapText}>
-          New Town,
-          Action Area II
-          <br />
-          Kolkata - 700156
-        </div>
-      </div>
-
-      <div
-        className={styles.nearbyGrid}
-      >
-        {NEARBY.map((item) => (
-          <div
-            key={item.name}
-            className={
-              styles.nearbyItem
-            }
-          >
-            <span
-              className={
-                styles.nearbyIcon
-              }
-            >
-              {item.icon}
-            </span>
-
-            <div>
-              <div
-                className={
-                  styles.nearbyLabel
-                }
-              >
-                {item.name}
-              </div>
-
-              <div
-                className={
-                  styles.nearbyDist
-                }
-              >
-                {item.dist}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      )}
     </section>
   );
 }

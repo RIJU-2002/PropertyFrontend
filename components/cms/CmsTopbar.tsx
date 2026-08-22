@@ -1,21 +1,32 @@
 'use client';
 
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { CmsTab } from '@/types';
 
 const TAB_TITLES: Record<CmsTab, string> = {
   dashboard: 'Dashboard',
   add: 'Add New Project',
+  add_agent: 'Add Agent',
+  view_agents: 'Agents',
+  edit_agent: 'Edit Agent',
+  view_agent: 'View Agent',
   enquiries: 'Enquiry Manager',
+  blogs: 'Add New Blogs',
+  view_blogs: 'View Blogs',
   leads: 'Lead Reports',
   media: 'Media Library',
+  analytics: 'Analytics',
+  edit: 'Edit Project',
+  view: 'View Project',
 };
 
 interface CmsTopbarProps {
   activeTab: CmsTab;
-  onAddProject: () => void;
+  onAddProject: () => void; 
 }
 
-export default function CmsTopbar({ activeTab, onAddProject }: CmsTopbarProps) {
+export default function CmsTopbar({ activeTab }: CmsTopbarProps) {
   const now = new Date().toLocaleString('en-IN', {
     day: '2-digit',
     month: 'short',
@@ -28,11 +39,14 @@ export default function CmsTopbar({ activeTab, onAddProject }: CmsTopbarProps) {
       <div className="topbar-left">
         <h1 className="topbar-title">{TAB_TITLES[activeTab]}</h1>
       </div>
+
       <div className="topbar-right">
         <span className="topbar-time">Last updated: {now}</span>
-        <button className="btn-add" onClick={onAddProject}>
-          + Add New Project
-        </button>
+
+        {/* <Link href="/" className="btn-home">
+          Website
+          <ArrowUpRight size={16} />
+      </Link> */}
       </div>
 
       <style jsx>{`
@@ -67,24 +81,31 @@ export default function CmsTopbar({ activeTab, onAddProject }: CmsTopbarProps) {
           color: #9CA3AF;
         }
 
-        .btn-add {
-          background: #C9A84C;
-          color: #0D1B2A;
-          border: none;
-          border-radius: 6px;
-          padding: 8px 18px;
-          font-size: 13px;
-          font-weight: 600;
-          font-family: inherit;
-          cursor: pointer;
-          transition: background 0.18s;
-          letter-spacing: 0.01em;
-        }
+        // .btn-home{
+        //     display:flex;
+        //     align-items:center;
+        //     gap:8px;
 
-        .btn-add:hover {
-          background: #9B7A2A;
-          color: #fff;
-        }
+        //     height:40px;
+        //     padding:0 18px;
+
+        //     border:1px solid #D4B15A;
+        //     border-radius:999px;
+
+        //     background:#fff;
+        //     color:#0D1B2A;
+
+        //     text-decoration:none;
+        //     font-weight:600;
+        //     font-size:14px;
+
+        //     transition:.25s;
+        // }
+
+        // .btn-home:hover{
+        //     background:#D4B15A;
+        //     color:#fff;
+        // }
       `}</style>
     </header>
   );

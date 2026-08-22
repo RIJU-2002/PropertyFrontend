@@ -52,6 +52,7 @@ export default function AuthPage() {
       await axiosInstance.post('/auth/send-otp', {
         phone: mobileNumber,
       })
+      setOtp(["", "", "", "", "", ""])
       setOtpSent(true)
       setStep('otp')
     } catch (err: any) {
@@ -123,7 +124,7 @@ export default function AuthPage() {
             {step === "phone" && (
               <>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Welcome to EstateFlow</h1>
+                  <h1 className="text-2xl font-semibold text-foreground">Welcome to EstateFlow</h1>
                   <p className="text-muted-foreground mt-1">Enter your mobile number to continue</p>
                 </div>
 
@@ -163,7 +164,7 @@ export default function AuthPage() {
             {step === "otp" && (
               <>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Verify OTP</h1>
+                  <h1 className="text-2xl font-semibold text-foreground">Verify OTP</h1>
                   <p className="text-muted-foreground mt-1">
                     Enter the 6-digit code sent to {mobileNumber}
                   </p>
@@ -198,7 +199,9 @@ export default function AuthPage() {
                       {"Didn't receive the code?"}{" "}
                       <button 
                         type="button"
-                        className="text-primary hover:underline"
+                        disabled={loading}
+                        onClick={handleSendOtp}
+                        className="text-primary hover:underline disabled:opacity-50"
                       >
                         Resend OTP
                       </button>
@@ -254,15 +257,15 @@ export default function AuthPage() {
 
           <div className="mt-12 grid grid-cols-3 gap-8">
             <div>
-              <p className="text-3xl font-bold text-primary">15K+</p>
+              <p className="text-3xl font-semibold text-primary">15K+</p>
               <p className="text-muted-foreground text-sm">Properties Listed</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-primary">8K+</p>
+              <p className="text-3xl font-semibold text-primary">8K+</p>
               <p className="text-muted-foreground text-sm">Happy Clients</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-primary">98%</p>
+              <p className="text-3xl font-semibold text-primary">98%</p>
               <p className="text-muted-foreground text-sm">Satisfaction Rate</p>
             </div>
           </div>

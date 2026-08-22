@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useCreateUser, fetchAgentById } from '@/hooks/useApi'
+import { useCreateUser, fetchAgentById, useUpdateAgent, useVerifyAgent, useActivateAgent, useAdminLeads } from '@/hooks/useApi'
+import { useAuth } from '@/hooks/useAuth'
+import { useQueryClient } from '@tanstack/react-query'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface AddAgentTabProps {
   onToast: (message: string) => void;
-
   mode?: "create" | "edit" | "view";
   agentId?: number | null;
+  onSaved?: () => void;
+  onEdit?: () => void;
 }
 
 interface FormData {
@@ -44,11 +47,19 @@ export default function AddAgentTab({
     onToast,
     mode = "create",
     agentId,
+    onSaved,
+    onEdit,
   }: AddAgentTabProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
-  const { mutate: createUser, isPending } = useCreateUser();
+  const { mutate: createUser, isPending: isCreating } = useCreateUser();
+  const { mutate: updateAgent, isPending: isUpdating } = useUpdateAgent();
+  const { mutate: verifyAgent, isPending: isVerifying } = useVerifyAgent();
+  const { mutate: activateAgent, isPending: isActivating } = useActivateAgent();
+  const queryClient = useQueryClient();
+  const { token, user } = useAuth();
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const isReadOnly = mode === "view";
+  const isPending = isCreating || isUpdating;
 
   const {
     data: agent,
@@ -57,6 +68,12 @@ export default function AddAgentTab({
     String(agentId),
     (mode === "edit" || mode === "view") && !!agentId
   );
+
+  const { data: agentLeadsData } = useAdminLeads(
+    { agentId: agentId ?? undefined, page: 1, limit: 10 },
+    mode !== 'create' && !!agentId
+  );
+  const assignedLeads = agentLeadsData?.data ?? [];
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -72,16 +89,57 @@ export default function AddAgentTab({
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const handlePublish = () => {
+    if (!token) {
+      onToast('Please log in as an admin before creating an agent');
+      return;
+    }
+    if (user?.role !== 'ADMIN') {
+      onToast('Only an admin account can create agents');
+      return;
+    }
     if (!formData.name.trim()) {
       onToast('Please enter the agent name');
       return;
     }
-    if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+    if (mode === 'create' && !/^[6-9]\d{9}$/.test(formData.phone.trim())) {
       onToast('Please enter a valid 10-digit mobile number');
       return;
     }
     if (!formData.agencyName.trim()) {
       onToast('Please enter an agency name');
+      return;
+    }
+
+    if (mode === 'edit' && agentId) {
+      updateAgent(
+        {
+          id: agentId,
+          payload: {
+            name: formData.name.trim(),
+            agencyName: formData.agencyName.trim(),
+            ...(formData.email.trim() ? { email: formData.email.trim() } : {}),
+            ...(formData.reraNumber.trim()
+              ? { reraNumber: formData.reraNumber.trim() }
+              : {}),
+          },
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['agents'] });
+            queryClient.invalidateQueries({ queryKey: ['agent', String(agentId)] });
+            onToast('✅ Agent updated successfully');
+            onSaved?.();
+          },
+          onError: (error: any) => {
+            const apiMessage = error?.response?.data?.message as string | undefined;
+            const code = error?.response?.data?.code as string | undefined;
+            onToast(
+              (code && ERROR_MESSAGES[code]) ||
+              (apiMessage ? `❌ ${apiMessage}` : '❌ Failed to update agent')
+            );
+          },
+        }
+      );
       return;
     }
 
@@ -101,7 +159,9 @@ export default function AddAgentTab({
         console.log(data);
         setFormData(INITIAL_FORM);
         setLicenseFile(null);
+        queryClient.invalidateQueries({ queryKey: ['agents'] });
         onToast('✅ Agent created successfully');
+        onSaved?.();
       },
 
       onError: (error: any) => {
@@ -148,7 +208,7 @@ export default function AddAgentTab({
                 placeholder="e.g. Rahul Mohanty"
                 value={formData.name}
                 onChange={e => update('name', e.target.value)}
-                disabled={isReadOnly || mode === "edit"}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -201,33 +261,92 @@ export default function AddAgentTab({
               </div>
             </div>
 
-            {agent?.isVerified !== undefined && (
-              <div className="field">
-                <label className="field-label">Status</label>
-                <p style={{ fontSize: 13, color: agent.isVerified ? '#0D1B2A' : '#A32D2D' }}>
-                  {agent.isVerified ? '✅ Verified' : '⏳ Pending Verification'}
-                </p>
-              </div>
-            )}
-
           </div>
         </div>
 
         {/* Publish Actions */}
         <div className="publish-row">
-          <button
-            className="btn-gold"
-            onClick={handlePublish}
-            disabled={isPending || isReadOnly}
-          >
-            {isPending ? 'Creating...' : 'Create Agent'}
-          </button>
+          {mode === 'view' ? (
+            <button className="btn-gold" onClick={() => onEdit?.()}>
+              Edit Agent
+            </button>
+          ) : (
+            <button
+              className="btn-gold"
+              onClick={handlePublish}
+              disabled={isPending || agentLoading}
+            >
+              {isPending
+                ? mode === 'edit' ? 'Saving...' : 'Creating...'
+                : mode === 'edit' ? 'Save Changes' : 'Create Agent'}
+            </button>
+          )}
         </div>
 
       </div>
 
       {/* ── RIGHT COLUMN ────────────────────────────────────────────────── */}
       <div className="form-right">
+
+        {mode !== 'create' && agent && (
+          <div className="card">
+            <div className="card-head">Agent Status</div>
+            <div className="card-body">
+              <div className="field">
+                <label className="field-label">Verification</label>
+                <select
+                  className="field-input"
+                  value={agent.isVerified ? 'true' : 'false'}
+                  disabled={isVerifying}
+                  onChange={(e) => {
+                    if (!agentId) return;
+                    const verified = e.target.value === 'true';
+                    verifyAgent(
+                      { id: agentId, verified },
+                      {
+                        onSuccess: () => {
+                          queryClient.invalidateQueries({ queryKey: ['agents'] });
+                          queryClient.invalidateQueries({ queryKey: ['agent', String(agentId)] });
+                          onToast(verified ? '✅ Agent verified' : '✅ Agent marked pending');
+                        },
+                        onError: () => onToast('❌ Failed to update verification'),
+                      }
+                    );
+                  }}
+                >
+                  <option value="false">Pending</option>
+                  <option value="true">Verified</option>
+                </select>
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="field-label">Account</label>
+                <select
+                  className="field-input"
+                  value={agent.isActive ? 'true' : 'false'}
+                  disabled={isActivating}
+                  onChange={(e) => {
+                    if (!agentId) return;
+                    const next = e.target.value === 'true';
+                    activateAgent(
+                      { id: agentId, isActive: next },
+                      {
+                        onSuccess: () => {
+                          queryClient.invalidateQueries({ queryKey: ['agents'] });
+                          queryClient.invalidateQueries({ queryKey: ['agent', String(agentId)] });
+                          onToast(next ? '✅ Agent activated' : '✅ Agent deactivated');
+                        },
+                        onError: () => onToast('❌ Failed to update agent status'),
+                      }
+                    );
+                  }}
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* License Upload */}
         <div className="card">
@@ -258,6 +377,40 @@ export default function AddAgentTab({
         </div>
 
       </div>
+
+      {mode !== 'create' && (
+        <div className="leads-wrap">
+          <div className="card">
+            <div className="card-head">Assigned Leads</div>
+            {assignedLeads.length === 0 ? (
+              <div className="leads-empty">No leads assigned to this agent yet.</div>
+            ) : (
+              <table className="leads-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assignedLeads.map((lead: any) => (
+                    <tr key={lead.id}>
+                      <td>{lead.guestName || lead.buyer?.name || 'Guest'}</td>
+                      <td>{lead.guestPhone || lead.buyer?.phone || '—'}</td>
+                      <td>{lead.project?.name || lead.property?.title || 'General'}</td>
+                      <td>{lead.status}</td>
+                      <td>{new Date(lead.createdAt).toLocaleDateString('en-IN')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Styles ──────────────────────────────────────────────────────── */}
       <style jsx>{`
@@ -350,6 +503,23 @@ export default function AddAgentTab({
         .upload-text { font-size: 13px; color: #6B7280; }
         .upload-link { color: #185FA5; font-weight: 500; }
         .upload-hint { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+        .leads-wrap { grid-column: 1 / -1; }
+        .leads-empty { padding: 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
+        .leads-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .leads-table th {
+          text-align: left;
+          padding: 10px 16px;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.09em;
+          color: #8A8A8A;
+          background: #FAF7F2;
+        }
+        .leads-table td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #FAF7F2;
+          color: #4A4A4A;
+        }
       `}</style>
     </div>
   );

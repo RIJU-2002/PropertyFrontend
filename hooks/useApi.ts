@@ -74,6 +74,52 @@ export const useCreateProject = () =>
     },
   })
 
+export const useUpdateProject = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: number
+      payload: Record<string, unknown>
+    }) => {
+      const { data } = await axiosInstance.patch(`/projects/${id}`, payload)
+      return data
+    },
+  })
+
+export const useVerifyAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      verified,
+    }: {
+      id: number
+      verified: boolean
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}/verify`, {
+        verified,
+      })
+      return data
+    },
+  })
+
+export const useActivateAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      isActive,
+    }: {
+      id: number
+      isActive: boolean
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}/activate`, {
+        isActive,
+      })
+      return data
+    },
+  })
+
 
 
 
@@ -272,3 +318,134 @@ export const fetchAgentById = (
       return data.data; // return only the agent object
     },
   });
+
+export const useAgents = (params?: {
+  page?: number
+  limit?: number
+  isVerified?: boolean
+}) =>
+  useQuery({
+    queryKey: ['agents', params],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/agents', { params })
+      return data as {
+        success: boolean
+        data: any[]
+        pagination: {
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }
+    },
+  })
+
+export const useUpdateAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: number
+      payload: {
+        agencyName?: string
+        reraNumber?: string
+        licenseUrl?: string
+        name?: string
+        email?: string
+      }
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}`, payload)
+      return data
+    },
+  })
+
+export const useSubmitLead = () =>
+  useMutation({
+    mutationFn: async (payload: {
+      projectId?: number
+      propertyId?: number
+      guestName: string
+      guestPhone: string
+      guestEmail?: string
+      message?: string
+      source?: string
+    }) => {
+      const { data } = await axiosInstance.post('/lead', payload)
+      return data
+    },
+  })
+
+export const useAdminLeads = (
+  params?: {
+    page?: number
+    limit?: number
+    status?: string
+    agentId?: number
+    unassigned?: boolean
+  },
+  enabled = true
+) =>
+  useQuery({
+    queryKey: ['admin-leads', params],
+    enabled,
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/lead', { params })
+      return data as {
+        success: boolean
+        data: any[]
+        pagination: {
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }
+    },
+  })
+
+export const useLeadSummary = () =>
+  useQuery({
+    queryKey: ['lead-summary'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/lead/summary')
+      return data.data
+    },
+  })
+
+export const useAssignLead = () =>
+  useMutation({
+    mutationFn: async ({
+      leadId,
+      agentId,
+    }: {
+      leadId: number
+      agentId: number
+    }) => {
+      const { data } = await axiosInstance.patch(`/lead/${leadId}/assign`, {
+        agentId,
+      })
+      return data
+    },
+  })
+
+export const useUpdateLeadStatus = () =>
+  useMutation({
+    mutationFn: async ({
+      leadId,
+      status,
+    }: {
+      leadId: number
+      status: string
+    }) => {
+      const { data } = await axiosInstance.patch(`/lead/${leadId}/status`, {
+        status,
+      })
+      return data
+    },
+  })

@@ -1,25 +1,37 @@
-import type { DashboardMetric } from '@/types';
-
 interface MetricCardProps {
-  metric: DashboardMetric;
+  label: string;
+  value: string | number;
+  trend?: string;
+  valueColor?: string;
+  trendColor?: string;
 }
 
-export default function MetricCard({ metric }: MetricCardProps) {
+export default function MetricCard({
+  label,
+  value,
+  trend,
+  valueColor,
+  trendColor,
+}: MetricCardProps) {
   return (
     <div className="metric-card">
-      <div className="metric-label">{metric.label}</div>
+      <div className="metric-label">{label}</div>
+
       <div
         className="metric-value"
-        style={metric.valueColor ? { color: metric.valueColor } : undefined}
+        style={valueColor ? { color: valueColor } : undefined}
       >
-        {metric.value}
+        {value}
       </div>
-      <div
-        className="metric-trend"
-        style={metric.trendColor ? { color: metric.trendColor } : undefined}
-      >
-        {metric.trend}
-      </div>
+
+      {trend && (
+        <div
+          className="metric-trend"
+          style={trendColor ? { color: trendColor } : undefined}
+        >
+          {trend}
+        </div>
+      )}
 
       <style jsx>{`
         .metric-card {

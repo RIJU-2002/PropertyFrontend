@@ -1,6 +1,11 @@
 "use client";
 
 import styles from "@/app/page.module.css";
+import { Project } from "@/lib/api/types";
+
+interface Props {
+  project: Project;
+}
 
 const highlights = [
   {
@@ -25,7 +30,7 @@ const highlights = [
   },
 ];
 
-export default function ProjectOverview() {
+export default function ProjectOverview({ project }: Props) {
   return (
     <section
       className={styles.card}
@@ -36,45 +41,25 @@ export default function ProjectOverview() {
       </div>
 
       <p className={styles.prose}>
-        Samriddh Heights is a premium
-        residential development located in
-        New Town Action Area II.
+        {project.description || "No description available."}
       </p>
 
-      <p
-        className={styles.prose}
-        style={{ marginBottom: 20 }}
-      >
-        Designed for modern families with
-        premium amenities, superior
-        connectivity and thoughtfully
-        designed apartments.
-      </p>
-
-      <div
-        className={styles.highlightsGrid}
-      >
+      <div className={styles.highlightsGrid}>
         {highlights.map((item) => (
           <div
             key={item.title}
-            className={
-              styles.highlightItem
-            }
+            className={styles.highlightItem}
           >
             <div className={styles.hlIcon}>
               {item.icon}
             </div>
 
             <div>
-              <div
-                className={styles.hlTitle}
-              >
+              <div className={styles.hlTitle}>
                 {item.title}
               </div>
 
-              <div
-                className={styles.hlSub}
-              >
+              <div className={styles.hlSub}>
                 {item.sub}
               </div>
             </div>

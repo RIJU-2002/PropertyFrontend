@@ -1,9 +1,15 @@
 "use client";
 
 import styles from "@/app/page.module.css";
-import { AMENITIES } from "@/data/projectData";
+import { Project } from "@/lib/api/types";
 
-export default function ProjectAmenities() {
+interface Props {
+  project: Project;
+}
+
+export default function ProjectAmenities({
+  project,
+}: Props) {
   return (
     <section
       className={styles.card}
@@ -13,27 +19,18 @@ export default function ProjectAmenities() {
         Amenities & Features
       </div>
 
-      <div
-        className={styles.amenityGrid}
-      >
-        {AMENITIES.map((amenity) => (
+      <div className={styles.amenityGrid}>
+        {project.amenities.map((item) => (
           <div
-            key={amenity.name}
-            className={
-              styles.amenity
-            }
+            key={item.amenity.id}
+            className={styles.amenity}
           >
-            <div
-              className={
-                styles.amenityIcon
-              }
-            >
-              {amenity.icon}
+            <div className={styles.amenityIcon}>
+              {/* Replace this later with an icon component */}
+              🏢
             </div>
 
-            <div>
-              {amenity.name}
-            </div>
+            <div>{item.amenity.name}</div>
           </div>
         ))}
       </div>

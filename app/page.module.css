@@ -22,7 +22,7 @@
 
 
 .pageWrapper {
-  padding-top: 64px;
+  padding-top: 136px;
 }
 
 .pageContainer {
@@ -33,6 +33,10 @@
 }
 
 @media (max-width: 768px) {
+  .pageWrapper {
+    padding-top: 104px;
+  }
+
   .pageContainer {
     padding-left: 20px;
     padding-right: 20px;
@@ -421,6 +425,8 @@
 .galleryBg {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -479,7 +485,7 @@
   padding: 0 48px;
   display: flex;
   position: sticky;
-  top: 68px;
+  top: 136px;
   z-index: 100;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
@@ -1031,7 +1037,7 @@
 /* ── SIDEBAR ── */
 .sidebar {
   position: sticky;
-  top: 110px;
+  top: 178px;
 }
 .sidebarEnq {
   background: var(--navy);
@@ -1485,6 +1491,12 @@
   }
   .navLinks {
     display: none;
+  }
+  .tabs {
+    top: 104px;
+  }
+  .sidebar {
+    top: 146px;
   }
   .projHero {
     padding: 28px 20px 0;

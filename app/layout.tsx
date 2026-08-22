@@ -6,9 +6,20 @@ import { AuthProvider } from '@/hooks/useAuth'
 import { CityProvider } from '@/contexts/city-context'
 import './globals.css'
 import { Providers } from './providers'
+import FloatingContact from '@/components/floatingComponent'
 
-const _montserrat = Montserrat({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Weights matching the client's spec: Regular (400), Medium (500), SemiBold (600)
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-montserrat",
+  display: "swap",
+})
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+})
 
 export const metadata: Metadata = {
   title: 'Samriddh - Your Dream. Our Commitments',
@@ -39,7 +50,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-background" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`bg-background ${montserrat.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="font-sans antialiased bg-background text-foreground">
         <Providers>
         <ThemeProvider
@@ -51,6 +66,10 @@ export default function RootLayout({
           <AuthProvider>
             <CityProvider>
             {children}
+            <FloatingContact 
+              whatsappNumber="919876543210"
+              email="contact@samriddhrealty.com"
+            />
           </CityProvider>
           </AuthProvider>
         </ThemeProvider>

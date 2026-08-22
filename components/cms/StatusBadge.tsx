@@ -1,6 +1,6 @@
 import type { ProjectStatus, EnquiryStatus,ProjectStats } from '@/types';
 
-type BadgeVariant = ProjectStatus | EnquiryStatus | ProjectStats;
+type BadgeVariant = ProjectStatus | EnquiryStatus | ProjectStats | string;
 
 const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
   Active: { bg: '#DCFCE7', color: '#166534' },
@@ -12,6 +12,12 @@ const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
   Contacted: { bg: '#DCFCE7', color: '#166534' },
   'Site Visit': { bg: '#EDE9FE', color: '#5B21B6' },
   Closed: { bg: '#F3F4F6', color: '#6B7280' },
+  NEW: { bg: '#DBEAFE', color: '#1E40AF' },
+  CONTACTED: { bg: '#DCFCE7', color: '#166534' },
+  SITE_VISIT_SCHEDULED: { bg: '#EDE9FE', color: '#5B21B6' },
+  NEGOTIATING: { bg: '#FEF3C7', color: '#92400E' },
+  CONVERTED: { bg: '#DCFCE7', color: '#166534' },
+  LOST: { bg: '#FEE2E2', color: '#991B1B' },
   UNDER_CONSTRUCTION:{ bg: '#FEE2E2', color: '#991B1B' },
   READY_TO_MOVE:{ bg: '#DCFCE7', color: '#166534' },
   NEW_LAUNCH:{ bg: '#DBEAFE', color: '#1E40AF' }

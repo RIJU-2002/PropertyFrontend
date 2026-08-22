@@ -1,31 +1,23 @@
 "use client";
-
-import { useState } from "react";
-
-import styles from "@/app/page.module.css";
-
 import FloorPlanSvg from "./FloorPlanSvg";
 
-import { FLOOR_PLANS } from "@/data/projectData";
+import { useState } from "react";
+import styles from "@/app/page.module.css";
+import { Project } from "@/lib/api/types";
 
 interface Props {
-  showToast: (
-    message: string
-  ) => void;
+  project: Project;
+  showToast: (message: string) => void;
 }
 
 export default function ProjectFloorPlan({
+  project,
   showToast,
 }: Props) {
-  const [activeFloor, setActiveFloor] =
-    useState(0);
+  const [activeFloor, setActiveFloor] = useState(0);
 
-  const floor =
-    FLOOR_PLANS[activeFloor];
-
-  const carpet = Math.round(
-    floor.sqft * 0.67
-  );
+  const floorPlans = project.floorPlans ?? [];
+  const floor = floorPlans[activeFloor];
 
   return (
     <section
@@ -36,82 +28,93 @@ export default function ProjectFloorPlan({
         Floor Plan
       </div>
 
+      {/* Tabs */}
       <div className={styles.floorTabs}>
-        {FLOOR_PLANS.map(
-          (item, index) => (
-            <button
-              key={item.label}
-              onClick={() =>
-                setActiveFloor(index)
-              }
-              className={`${styles.floorTab}
+        {floorPlans.map((item, index) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveFloor(index)}
+            className={`${styles.floorTab}
               ${
                 activeFloor === index
                   ? styles.floorTabActive
                   : ""
               }`}
+          >
+            {item.bhkType} BHK
+          </button>
+        ))}
+      </div>
+
+      {floor ? (
+        <>
+          <div className={styles.floorPlanViewer}>
+            {floor.imageUrl ? (
+              <img
+                src={floor.imageUrl}
+                alt={floor.name}
+                className={styles.floorPlanImage}
+              />
+            ) : (
+              <FloorPlanSvg />
+            )}
+
+            <div className={styles.floorPlanLabel}>
+              {floor.name}
+            </div>
+
+            <div className={styles.floorPlanSize}>
+              Carpet Area:
+              {" "}
+              {floor.carpetArea ?? "-"} sq.ft
+              <br />
+
+              Built-up Area:
+              {" "}
+              {floor.builtUpArea ?? "-"} sq.ft
+              <br />
+
+              Super Area:
+              {" "}
+              {floor.superArea ?? "-"} sq.ft
+              <br />
+
+              {floor.price && (
+                <>
+                  Price:
+                  {" "}
+                  ₹
+                  {Number(floor.price).toLocaleString("en-IN")}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.floorPlanActions}>
+            <button
+              className={`${styles.btn} ${styles.btnNavy}`}
+              onClick={() =>
+                showToast("🏠 Site visit scheduled!")
+              }
             >
-              {item.label}
+              Book Site Visit
             </button>
-          )
-        )}
-      </div>
 
-      <div
-        className={
-          styles.floorPlanViewer
-        }
-      >
-        <FloorPlanSvg />
-
-        <div
-          className={
-            styles.floorPlanLabel
-          }
-        >
-          {floor.label}
+            <button
+              className={`${styles.btn} ${styles.btnOutline}`}
+              onClick={() =>
+                showToast("📤 Floor plan shared!")
+              }
+            >
+              Share
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className={styles.emptyState}>
+          No floor plans available.
         </div>
-
-        <div
-          className={
-            styles.floorPlanSize
-          }
-        >
-          Super Built-up:
-          {floor.sqft} sq.ft
-          <br />
-          Carpet:
-          {carpet} sq.ft
-        </div>
-      </div>
-
-      <div
-        className={
-          styles.floorPlanActions
-        }
-      >
-        <button
-          className={`${styles.btn} ${styles.btnNavy}`}
-          onClick={() =>
-            showToast(
-              "🏠 Site visit scheduled!"
-            )
-          }
-        >
-          Book Site Visit
-        </button>
-
-        <button
-          className={`${styles.btn} ${styles.btnOutline}`}
-          onClick={() =>
-            showToast(
-              "📤 Floor plan shared!"
-            )
-          }
-        >
-          Share
-        </button>
-      </div>
+      )}
     </section>
   );
 }

@@ -1,0 +1,345 @@
+/* ArticleGrid.module.css */
+
+.section {
+  padding: 80px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+/* ── header ── */
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  border: 1px solid #C9A84C33;
+  border-radius: 2px;
+  padding: 4px 12px;
+  margin-bottom: 16px;
+}
+
+.heading {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  color: #0D1B2A;
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+
+.subheading {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  color: #5a6a7a;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── filter tabs ── */
+.filterRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.filterBtn {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5a6a7a;
+  background: #f4f6f8;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.filterBtn:hover {
+  color: #0D1B2A;
+  border-color: #C9A84C44;
+}
+
+.activeFilter {
+  background: #0D1B2A;
+  color: #C9A84C;
+  border-color: #0D1B2A;
+}
+
+/* ── grid layout ── */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.secondaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* ── card ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e8edf2;
+  background: #fff;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 32px rgba(13, 27, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+/* featured card: side-by-side on desktop */
+.featured {
+  flex-direction: row;
+}
+
+.featured .cardImage {
+  width: 55%;
+  flex-shrink: 0;
+  min-height: 320px;
+}
+
+.featured .cardBody {
+  padding: 36px 32px;
+  justify-content: center;
+}
+
+.featured .cardTitle {
+  font-size: 24px;
+}
+
+.featured .cardExcerpt {
+  display: block;
+  -webkit-line-clamp: 4;
+}
+
+/* ── card image ── */
+.cardImage {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #0D1B2A0a;
+  overflow: hidden;
+}
+
+.img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .img {
+  transform: scale(1.03);
+}
+
+.imgPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0D1B2A 0%, #1a3354 100%);
+}
+
+.imgPlaceholder span {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #C9A84C;
+  opacity: 0.4;
+}
+
+.categoryBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0D1B2A;
+  background: #C9A84C;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+/* ── card body ── */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px 24px;
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #8a9aaa;
+  margin-bottom: 10px;
+}
+
+.dot {
+  color: #C9A84C;
+}
+
+.cardTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0D1B2A;
+  line-height: 1.3;
+  margin: 0 0 10px;
+}
+
+.cardExcerpt {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: #5a6a7a;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  flex: 1;
+}
+
+.readMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #C9A84C;
+  margin-top: auto;
+  transition: gap 0.18s ease;
+}
+
+.card:hover .readMore {
+  gap: 10px;
+}
+
+/* ── view all ── */
+.viewAll {
+  text-align: center;
+  margin-top: 48px;
+}
+
+.viewAllBtn {
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0D1B2A;
+  border: 1.5px solid #0D1B2A;
+  border-radius: 4px;
+  padding: 12px 32px;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  letter-spacing: 0.03em;
+}
+
+.viewAllBtn:hover {
+  background: #0D1B2A;
+  color: #C9A84C;
+}
+
+/* ── loading skeleton ── */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.skeleton {
+  height: 340px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f4f8 25%, #e4eaf0 50%, #f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── empty ── */
+.empty {
+  text-align: center;
+  color: #8a9aaa;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  padding: 60px 0;
+}
+
+/* ── responsive ── */
+@media (max-width: 768px) {
+  .featured {
+    flex-direction: column;
+  }
+
+  .featured .cardImage {
+    width: 100%;
+    min-height: 200px;
+  }
+
+  .featured .cardBody {
+    padding: 20px 22px 24px;
+  }
+
+  .featured .cardTitle {
+    font-size: 18px;
+  }
+
+  .secondaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #ececec 25%,
+    #f7f7f7 37%,
+    #ececec 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+  border-radius: 12px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}

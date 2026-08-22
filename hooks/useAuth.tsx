@@ -32,6 +32,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
+  // Keep auth state in sync across tabs — if the token is cleared
+  // (logout) in one tab, reflect that here without needing a refresh.
+  useEffect(() => {
+    const syncAcrossTabs = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        if (!e.newValue) {
+          setToken(null)
+          setUser(null)
+        } else {
+          const storedUser = localStorage.getItem('user')
+          setToken(e.newValue)
+          setUser(storedUser ? JSON.parse(storedUser) : null)
+        }
+      }
+    }
+
+    window.addEventListener('storage', syncAcrossTabs)
+    return () => window.removeEventListener('storage', syncAcrossTabs)
+  }, [])
+
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken)
     localStorage.setItem('user', JSON.stringify(newUser))
@@ -56,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={contextValue as any}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   )

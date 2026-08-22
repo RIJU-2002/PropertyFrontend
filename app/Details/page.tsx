@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import styles from "../page.module.css";
+import EnquiryModal from "@/components/project-details/EnquiryModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -258,87 +259,6 @@ function FloorPlanSvg() {
       <rect x="10" y="94" width="60" height="16" rx="1" strokeDasharray="3 2" />
       <text x="30" y="105" fontSize="7" fill="#C9A84C" opacity=".5" fontFamily="DM Sans">Balcony</text>
     </svg>
-  );
-}
-
-// ─── Main Modal ───────────────────────────────────────────────────────────────
-
-interface ModalProps {
-  propName: string;
-  onClose: () => void;
-}
-function EnquiryModal({ propName, onClose }: ModalProps) {
-  const [submitted, setSubmitted] = useState(false);
-
-  return (
-    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={styles.modal}>
-        <button className={styles.modalClose} onClick={onClose}>✕</button>
-        {!submitted ? (
-          <>
-            <h3 className={styles.modalTitle}>Get Free Callback</h3>
-            <p className={styles.modalSub}>Our advisor will call you back within 30 minutes</p>
-            <span className={styles.propNameTag}>{propName}</span>
-
-            <div className={styles.formGroup}>
-              <label>Your Name *</label>
-              <input className={styles.formInput} type="text" placeholder="Enter your full name" />
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Phone *</label>
-                <input className={styles.formInput} type="tel" placeholder="+91 XXXXX XXXXX" />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Email</label>
-                <input className={styles.formInput} type="email" placeholder="your@email.com" />
-              </div>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Configuration</label>
-              <select className={styles.formSelect}>
-                <option>2 BHK (₹68L–₹85L)</option>
-                <option>3 BHK (₹98L–₹1.18Cr)</option>
-                <option>3 BHK+ (₹1.18Cr–₹1.35Cr)</option>
-                <option>Not Sure</option>
-              </select>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Budget Range</label>
-              <select className={styles.formSelect}>
-                <option>₹60L – ₹1Cr</option>
-                <option>₹1Cr – ₹1.5Cr</option>
-                <option>₹1.5Cr+</option>
-              </select>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Message (optional)</label>
-              <textarea className={styles.formInput} rows={3}
-                placeholder="Any specific requirements or questions…"
-                style={{ resize: "vertical" }} />
-            </div>
-            <button className={`${styles.btn} ${styles.btnGold} ${styles.btnFull} ${styles.btnLg}`}
-              onClick={() => setSubmitted(true)}>
-              📞 Request Free Callback
-            </button>
-            <p className={styles.modalFormNote}>🔒 Your details are 100% confidential. No spam, ever.</p>
-          </>
-        ) : (
-          <div className={styles.successMsg}>
-            <div className={styles.successCheckmark}>✅</div>
-            <h4 className={styles.successTitle}>Enquiry Submitted!</h4>
-            <p className={styles.successSub}>
-              Our advisor will call you within 30 minutes.
-              <br />Check your WhatsApp for confirmation.
-            </p>
-            <button className={`${styles.btn} ${styles.btnGold} ${styles.btnFull} ${styles.btnLg}`}
-              style={{ marginTop: 24 }} onClick={onClose}>
-              Done
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -951,7 +871,11 @@ export default function SamriddhHeightsPage() {
 
       {/* ── MODAL ── */}
       {modalOpen && (
-        <EnquiryModal propName={modalProp} onClose={() => setModalOpen(false)} />
+        <EnquiryModal
+          propName={modalProp}
+          source="details_page"
+          onClose={() => setModalOpen(false)}
+        />
       )}
 
       {/* ── TOAST ── */}

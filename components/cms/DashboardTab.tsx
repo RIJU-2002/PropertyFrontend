@@ -1,22 +1,86 @@
 import MetricCard from './MetricCard';
 import StatusBadge from './StatusBadge';
 import { mockDashboardMetrics, mockProjects, mockEnquiries } from '@/data/mockData';
-import { useProjects } from '@/hooks/useApi';
+import { useProjects,useDashboardAnalytics } from '@/hooks/useApi';
+import { useRouter } from "next/navigation";
 
-export default function DashboardTab() {
+
+interface Props {
+  onEditProject: (id: number) => void;
+  onViewProject: (id: number) => void;
+}
+
+export default function DashboardTab({
+  onEditProject,
+  onViewProject,
+}: Props) {
+
+  const router = useRouter();
 
   const { data, isLoading } = useProjects();
 
+  const {
+    data: analytics,
+    isLoading: analyticsLoading,
+  } = useDashboardAnalytics();
   const projects = data?.projects ?? [];
   const pagination = data?.pagination;
+  const overview = analytics?.overview;
+
+  const dashboardMetrics = [
+    {
+      label: "Projects",
+      value: analytics?.overview.projects.total ?? 0,
+      icon: "🏗",
+    },
+    {
+      label: "Properties",
+      value: analytics?.overview.properties.total ?? 0,
+      icon: "🏠",
+    },
+    {
+      label: "Builders",
+      value: analytics?.overview.builders.total ?? 0,
+      icon: "👷",
+    },
+    {
+      label: "Cities",
+      value: analytics?.overview.locations.cities ?? 0,
+      icon: "📍",
+    },
+  ];
 
   return (
     <div className="tab-content">
       {/* Metrics Grid */}
       <div className="metrics-grid">
-        {mockDashboardMetrics.map((m) => (
-          <MetricCard key={m.label} metric={m} />
-        ))}
+        {overview && (
+          <>
+            <MetricCard
+              label="Projects"
+              value={overview.projects.total}
+              trend={`${overview.monthlyProjects} added this month`}
+            />
+
+            <MetricCard
+              label="Properties"
+              value={overview.properties.total}
+              trend={`${overview.monthlyProperties} added this month`}
+            />
+
+            <MetricCard
+              label="Builders"
+              value={overview.builders.total}
+              trend={`${overview.builders.verified} verified`}
+            />
+
+            <MetricCard
+              label="Cities"
+              value={overview.locations.cities}
+              trend={`${overview.locations.localities} localities`}
+            />
+          </>
+        )}
       </div>
 
       {/* Recent Enquiries */}
@@ -94,8 +158,19 @@ export default function DashboardTab() {
 
                   <td>
                     <div className="action-btns">
-                      <button className="action-btn">Edit</button>
-                      <button className="action-btn">View</button>
+                      <button
+                        className="action-btn"
+                        onClick={() => onEditProject(p.id)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="action-btn"
+                        onClick={() => onViewProject(p.id)}
+                      >
+                        View
+                      </button>
                     </div>
                   </td>
                 </tr>

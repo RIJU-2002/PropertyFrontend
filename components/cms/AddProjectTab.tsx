@@ -1,19 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { useCreateProject,useAmenities,useGeocodeLocation } from '@/hooks/useApi'
+import { useEffect, useState } from 'react';
+import { useCreateProject, useUpdateProject, useAmenities, useGeocodeLocation, fetchProjectbyId } from '@/hooks/useApi'
+import { useQueryClient } from '@tanstack/react-query'
 import { setDate } from 'date-fns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface AddProjectTabProps {
-  onToast: (msg: string) => void;
+  onToast: (message: string) => void;
+
+  mode?: "create" | "edit" | "view";
+  projectId?: number | null;
+  projectSlug?: string;
+  onEdit?: () => void;
 }
 
 interface Configuration {
   type: string;
   area: string;
   carpetArea:string;
+  bastu_Info:string;
   bedRoom:string;
   livingArea:string;
   kitchen:string;
@@ -58,6 +65,11 @@ interface FormData {
   slug: string;
   leadEmail: string;
   whatsappNumber: string;
+  minPrice: string;
+  expectedRentMonthly: string;
+  appreciationRate: string;
+  rentalDemand: "HIGH" | "MEDIUM" | "LOW";
+  nearbyInfrastructure: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -87,7 +99,7 @@ const INITIAL_FORM: FormData = {
 
   mapsLink: '',
 
-  propertyType: 'Residential Apartment',
+  propertyType: 'APARTMENT',
   status: 'New Launch',
   totalUnits: '',
   availableUnits: '',
@@ -99,6 +111,11 @@ const INITIAL_FORM: FormData = {
   slug: '',
   leadEmail: 'leads@samriddhrealty.in',
   whatsappNumber: '+91 98XXX XXXXX',
+  minPrice: '',
+  expectedRentMonthly: '',
+  appreciationRate: '',
+  rentalDemand: 'MEDIUM',
+  nearbyInfrastructure: '',
 };
 
 const INITIAL_CONFIGS: Configuration[] = [
@@ -106,6 +123,7 @@ const INITIAL_CONFIGS: Configuration[] = [
     type: '2 BHK',
     area: '875-1050',
     carpetArea: '590-710 sq.ft.',
+    bastu_Info:'Yes',
     bedRoom: '2 BedRooms + 2 BathRooms',
     livingArea: '240 sq.ft',
     kitchen: 'Semi-modular with utility',
@@ -121,12 +139,20 @@ const INITIAL_CONFIGS: Configuration[] = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function AddProjectTab({ onToast }: AddProjectTabProps) {
+export default function AddProjectTab({
+    onToast,
+    mode = "create",
+    projectId,
+    projectSlug,
+    onEdit,
+  }: AddProjectTabProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
   const { mutate: createProject, isPending } = useCreateProject();
+  const { mutate: updateProject, isPending: isUpdating } = useUpdateProject();
+  const queryClient = useQueryClient();
   const [configs, setConfigs] = useState<Configuration[]>([
-    { type: '2 BHK', area: '875-1050',carpetArea: '590-710 sq.ft.',bedRoom: '2 BedRooms + 2 BathRooms',livingArea: '240 sq.ft',kitchen:'Semi-modular with utility',balconies:'1',floorHeight:'10 ft',flooring: 'Tiles',facing:'North',pricePerArea:'₹7772-8000' , price: '₹68,00,000', units: '60' },
-    { type: '3 BHK', area: '1200-1450',carpetArea: '590-710 sq.ft.',bedRoom: '2 BedRooms + 2 BathRooms',livingArea: '240 sq.ft',kitchen:'Semi-modular with utility',balconies:'1',floorHeight:'10 ft',flooring: 'Tiles',facing:'North',pricePerArea:'₹7772-8000', price: '₹98,00,000', units: '50' },
+    { type: '2 BHK', area: '875-1050',carpetArea: '590-710 sq.ft.',bastu_Info:'Yes',bedRoom: '2 BedRooms + 2 BathRooms',livingArea: '240 sq.ft',kitchen:'Semi-modular with utility',balconies:'1',floorHeight:'10 ft',flooring: 'Tiles',facing:'North',pricePerArea:'₹7772-8000' , price: '₹68,00,000', units: '60' },
+    { type: '3 BHK', area: '1200-1450',carpetArea: '590-710 sq.ft.',bastu_Info:'Yes',bedRoom: '2 BedRooms + 2 BathRooms',livingArea: '240 sq.ft',kitchen:'Semi-modular with utility',balconies:'1',floorHeight:'10 ft',flooring: 'Tiles',facing:'North',pricePerArea:'₹7772-8000', price: '₹98,00,000', units: '50' },
   ]);
   // const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
   //   'Swimming Pool', 'Gymnasium', '24×7 Security', 'Covered Parking', 'Power Backup',
@@ -134,11 +160,20 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
   const [customAmenity, setCustomAmenity] = useState('');
   const [wpAlerts, setWpAlerts] = useState(true);
   const [images, setImages] = useState<File[]>([]);
-
+  const isReadOnly = mode === "view";
   const { data: amenities = [], isLoading } = useAmenities();
   const [selectedAmenityIds, setSelectedAmenityIds] =
   useState<number[]>([]);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isActive, setIsActive] = useState(true);
 
+  const {
+    data: project,
+    isLoading: projectLoading,
+  } = fetchProjectbyId(
+    String(projectId),
+    (mode === "edit" || mode === "view") && !!projectId
+  );
   const { mutateAsync: geocodeAddress } =useGeocodeLocation();
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -146,13 +181,36 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
   const update = (field: keyof FormData, val: string) =>
     setFormData(prev => ({ ...prev, [field]: val }));
 
+  const digitsOnly = (value: string) => value.replace(/[^\d]/g, "");
+
+  const roiPayload = () => {
+    const configPrices = configs
+      .map((cfg) => Number(cfg.price.replace(/[₹,\s]/g, "")))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const minPrice =
+      digitsOnly(formData.minPrice) ||
+      (configPrices.length ? String(Math.min(...configPrices)) : "");
+
+    return {
+      minPrice: minPrice || undefined,
+      expectedRentMonthly: digitsOnly(formData.expectedRentMonthly)
+        ? Number(digitsOnly(formData.expectedRentMonthly))
+        : undefined,
+      appreciationRate: formData.appreciationRate.trim()
+        ? Number(formData.appreciationRate)
+        : undefined,
+      rentalDemand: formData.rentalDemand,
+      nearbyInfrastructure: formData.nearbyInfrastructure.trim() || undefined,
+    };
+  };
+
   // const toggleAmenity = (a: string) =>
   //   setSelectedAmenities(prev =>
   //     prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]
   //   );
 
   const addConfig = () =>
-    setConfigs(prev => [...prev, { type: '', area: '',carpetArea: '',bedRoom: '',livingArea: '',kitchen:'',balconies:'',floorHeight:'',flooring: '',facing:'',pricePerArea:'', price: '', units: '' }]);
+    setConfigs(prev => [...prev, { type: '', area: '',carpetArea: '',bastu_Info:'',bedRoom: '',livingArea: '',kitchen:'',balconies:'',floorHeight:'',flooring: '',facing:'',pricePerArea:'', price: '', units: '' }]);
 
   const removeConfig = (i: number) =>
     setConfigs(prev => prev.filter((_, idx) => idx !== i));
@@ -187,6 +245,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
 
     fd.append('metaTitle', formData.metaTitle);
     fd.append('metaDescription', formData.metaDesc);
+    fd.append('propertyType',formData.propertyType);
 
     // Temporary until city/locality selectors are added
     fd.append('address', formData.address);
@@ -206,11 +265,18 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
     if (formData.longitude)
       fd.append('longitude', String(formData.longitude));
 
+    const roi = roiPayload();
+    if (roi.minPrice) fd.append("minPrice", roi.minPrice);
+    if (roi.expectedRentMonthly) fd.append("expectedRentMonthly", String(roi.expectedRentMonthly));
+    if (roi.appreciationRate !== undefined) fd.append("appreciationRate", String(roi.appreciationRate));
+    fd.append("rentalDemand", roi.rentalDemand);
+    if (roi.nearbyInfrastructure) fd.append("nearbyInfrastructure", roi.nearbyInfrastructure);
+
     // Convert configs to backend format
    const transformedConfigs = configs.map((cfg) => ({
       unitType: cfg.type,
       buildAreaRange: cfg.area,
-
+      bastu_Info: cfg.bastu_Info,
       carpetArea: cfg.carpetArea,
       bedRoom: cfg.bedRoom,
       livingArea: cfg.livingArea,
@@ -312,6 +378,48 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
   };
 
   const handlePublish = () => {
+    if (mode === 'edit' && projectId) {
+      updateProject(
+        {
+          id: projectId,
+          payload: {
+            name: formData.projectName,
+            builderName: formData.developerName,
+            description: formData.description,
+            reraNumber: formData.reraNumber,
+            launchDate: formData.launchDate || undefined,
+            possessionDate: formData.possessionDate || undefined,
+            possessionStatus: formData.status,
+            projectType: formData.propertyType.trim(),
+            address: formData.address,
+            cityName: formData.cityName,
+            localityName: formData.localityName,
+            stateId: formData.stateId,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            metaTitle: formData.metaTitle,
+            metaDescription: formData.metaDesc,
+            totalUnits: formData.totalUnits ? Number(formData.totalUnits) : undefined,
+            isVerified,
+            isActive,
+            ...roiPayload(),
+          },
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['project', String(projectId)] });
+            onToast('✅ Project updated successfully');
+          },
+          onError: (error) => {
+            console.error(error);
+            onToast('❌ Failed to update project');
+          },
+        }
+      );
+      return;
+    }
+
     const fd = buildFormData();
 
     createProject(fd, {
@@ -333,6 +441,27 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
       },
     });
   };
+  const saveProjectStatus = (
+    payload: Record<string, unknown>,
+    successMessage: string
+  ) => {
+    if (!projectId || mode === "create") return;
+
+    updateProject(
+      { id: projectId, payload },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["projects"] });
+          queryClient.invalidateQueries({
+            queryKey: ["project", String(projectId)],
+          });
+          onToast(successMessage);
+        },
+        onError: () => onToast("❌ Failed to update status"),
+      }
+    );
+  };
+
   const handleDraft = () => {
     const fd = buildFormData();
     fd.append('isDraft', 'true');
@@ -340,6 +469,93 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
     onToast('📋 Draft payload logged — open Console to inspect');
   };
 
+  console.log(mode);      // "create" | "edit" | "view"
+  console.log(projectId);
+  useEffect(() => {
+    if (!project) return;
+
+    setFormData({
+      projectName: project.name ?? "",
+      developerName: project.builder?.name ?? "",
+
+      address: project.address ?? "",
+      reraNumber: project.reraNumber ?? "",
+
+      cityId: project.city?.id ?? null,
+      cityName: project.city?.name ?? "",
+
+      stateId: project.city?.state?.id ?? null,
+      stateName: project.city?.state?.name ?? "",
+
+      localityName: project.locality?.name ?? "",
+
+      latitude: project.latitude ?? null,
+      longitude: project.longitude ?? null,
+
+      mapsLink: "",
+
+      propertyType: project.projectType ?? "APARTMENT",
+      status: project.possessionStatus ?? "NEW_LAUNCH",
+
+      totalUnits: project.totalUnits?.toString() ?? "",
+      availableUnits: "",
+
+      possessionDate: project.possessionDate
+        ? project.possessionDate.slice(0, 7)
+        : "",
+
+      launchDate: project.launchDate
+        ? project.launchDate.slice(0, 10)
+        : "",
+
+      description: project.description ?? "",
+
+      metaTitle: project.metaTitle ?? "",
+      metaDesc: project.metaDescription ?? "",
+
+      slug: project.slug ?? "",
+      leadEmail: "leads@samriddhrealty.in",
+      whatsappNumber: "+91 98XXX XXXXX",
+      minPrice: project.minPrice != null ? String(project.minPrice) : "",
+      expectedRentMonthly:
+        project.expectedRentMonthly != null
+          ? String(project.expectedRentMonthly)
+          : "",
+      appreciationRate:
+        project.appreciationRate != null ? String(project.appreciationRate) : "",
+      rentalDemand: project.rentalDemand ?? "MEDIUM",
+      nearbyInfrastructure: project.nearbyInfrastructure ?? "",
+    });
+    setIsVerified(Boolean(project.isVerified));
+    setIsActive(project.isActive !== false);
+    setConfigs(
+      (project.configs ?? []).map((cfg: any) => ({
+      type: cfg.unitType ?? "",
+      area: cfg.buildAreaRange ?? "",
+      carpetArea: cfg.carpetArea ?? "",
+      bastu_Info: cfg.bastu_Info ?? "",
+      bedRoom: cfg.bedRoom ?? "",
+      livingArea: cfg.livingArea ?? "",
+      kitchen: cfg.kitchen ?? "",
+      balconies: cfg.balconies ?? "",
+      floorHeight: cfg.floorHeight ?? "",
+      flooring: cfg.flooring ?? "",
+      facing: cfg.facing ?? "",
+      pricePerArea: cfg.pricePerArea ?? "",
+      price: cfg.price
+        ? `₹${Number(cfg.price).toLocaleString("en-IN")}`
+        : "",
+      units: cfg.units?.toString() ?? "",
+    }))
+  );
+
+  setSelectedAmenityIds(
+    (project.amenities ?? [])
+      .map((a: any) => a.amenityId ?? a.amenity?.id)
+      .filter(Boolean)
+  );
+
+}, [project]);
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
@@ -359,6 +575,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                 placeholder="e.g. Samriddh Heights Phase 2"
                 value={formData.projectName}
                 onChange={e => update('projectName', e.target.value)}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -370,6 +587,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="Developer / Builder name"
                   value={formData.developerName}
                   onChange={e => update('developerName', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
               <div className="field">
@@ -379,6 +597,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="WBRERA/P/KOL/2024/XXX"
                   value={formData.reraNumber}
                   onChange={e => update('reraNumber', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -391,11 +610,13 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="Area, City"
                   value={formData.address}
                   onChange={e => update('address', e.target.value)}
+                  disabled={isReadOnly}
                 />
                 <button
                   type="button"
                   className="btn-secondary mt-2"
                   onClick={handleFetchLocation}
+                  disabled={isReadOnly}
                 >
                   Fetch Location
                 </button>
@@ -415,6 +636,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="Paste maps URL"
                   value={formData.mapsLink}
                   onChange={e => update('mapsLink', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -426,12 +648,18 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   className="field-input"
                   value={formData.propertyType}
                   onChange={e => update('propertyType', e.target.value)}
+                  disabled={isReadOnly}
                 >
-                  <option>Residential Apartment</option>
-                  <option>Villa</option>
-                  <option>Plot</option>
-                  <option>Commercial</option>
-                  <option>Mixed Use</option>
+                  <option value="APARTMENT">APARTMENT</option>
+                  <option value="VILLA">VILLA</option>
+                  <option value="PLOT">PLOT</option>
+                  <option value="INDEPENDENT_HOUSE">INDEPENDENT_HOUSE</option>
+                  <option value="BUILDER_FLOOR">BUILDER_FLOOR</option>
+                  <option value="PENTHOUSE">PENTHOUSE</option>
+                  <option value="STUDIO">STUDIO</option>
+                  <option value="COMMERCIAL_OFFICE">COMMERCIAL_OFFICE</option>
+                  <option value="COMMERCIAL_SHOP">COMMERCIAL_SHOP</option>
+                  <option value="WAREHOUSE">WAREHOUSE</option>
                 </select>
               </div>
               <div className="field">
@@ -439,11 +667,20 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                 <select
                   className="field-input"
                   value={formData.status}
-                  onChange={e => update('status', e.target.value)}
+                  onChange={e => {
+                    const value = e.target.value;
+                    update('status', value);
+                    if (projectId && mode !== 'create') {
+                      saveProjectStatus(
+                        { possessionStatus: value },
+                        '✅ Project status updated'
+                      );
+                    }
+                  }}
                 >
-                  <option>NEW_LAUNCH</option>
-                  <option>UNDER_CONSTRUCTION</option>
-                  <option>READY_TO_MOVE</option>
+                  <option value="NEW_LAUNCH">NEW_LAUNCH</option>
+                  <option value="UNDER_CONSTRUCTION">UNDER_CONSTRUCTION</option>
+                  <option value="READY_TO_MOVE">READY_TO_MOVE</option>
                 </select>
               </div>
             </div>
@@ -457,6 +694,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="e.g. 120"
                   value={formData.totalUnits}
                   onChange={e => update('totalUnits', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
               <div className="field">
@@ -467,6 +705,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   placeholder="e.g. 88"
                   value={formData.availableUnits}
                   onChange={e => update('availableUnits', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -479,6 +718,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   type="month"
                   value={formData.possessionDate}
                   onChange={e => update('possessionDate', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
               <div className="field">
@@ -488,6 +728,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                   type="date"
                   value={formData.launchDate}
                   onChange={e => update('launchDate', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -500,9 +741,96 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                 placeholder="Write a compelling description..."
                 value={formData.description}
                 onChange={e => update('description', e.target.value)}
+                disabled={isReadOnly}
               />
             </div>
 
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-head">Investment &amp; ROI</div>
+          <div className="card-body">
+            <p className="field-hint">
+              Used to calculate rental yield, payback years, and investment score. Yield = (monthly rent × 12) ÷ starting price.
+            </p>
+            <div className="field-row">
+              <div className="field">
+                <label className="field-label">Starting price (₹) *</label>
+                <input
+                  className="field-input"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 6800000"
+                  value={formData.minPrice}
+                  onChange={e => update('minPrice', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div className="field">
+                <label className="field-label">Expected monthly rent (₹)</label>
+                <input
+                  className="field-input"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 28000"
+                  value={formData.expectedRentMonthly}
+                  onChange={e => update('expectedRentMonthly', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label className="field-label">Appreciation rate (% / year)</label>
+                <input
+                  className="field-input"
+                  type="number"
+                  min="0"
+                  max="50"
+                  step="0.1"
+                  placeholder="e.g. 8"
+                  value={formData.appreciationRate}
+                  onChange={e => update('appreciationRate', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div className="field">
+                <label className="field-label">Rental demand</label>
+                <select
+                  className="field-input"
+                  value={formData.rentalDemand}
+                  onChange={e => update('rentalDemand', e.target.value)}
+                  disabled={isReadOnly}
+                >
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </select>
+              </div>
+            </div>
+            <div className="field">
+              <label className="field-label">Nearby infrastructure</label>
+              <textarea
+                className="field-input"
+                rows={3}
+                placeholder="Metro, IT parks, schools, hospitals..."
+                value={formData.nearbyInfrastructure}
+                onChange={e => update('nearbyInfrastructure', e.target.value)}
+                disabled={isReadOnly}
+              />
+            </div>
+            {digitsOnly(formData.minPrice) && digitsOnly(formData.expectedRentMonthly) && (
+              <p className="field-hint">
+                Estimated yield:{" "}
+                {(
+                  (Number(digitsOnly(formData.expectedRentMonthly)) * 12 /
+                    Number(digitsOnly(formData.minPrice))) *
+                  100
+                ).toFixed(1)}
+                %
+              </p>
+            )}
           </div>
         </div>
 
@@ -519,6 +847,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                     <button
                       className="remove-btn"
                       onClick={() => removeConfig(i)}
+                      disabled={isReadOnly}
                     >
                       ✕
                     </button>
@@ -534,6 +863,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                           updateConfig(i, "type", e.target.value)
                         }
                         placeholder="2 BHK"
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -546,17 +876,19 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                           updateConfig(i, "area", e.target.value)
                         }
                         placeholder="875-1050"
+                        disabled={isReadOnly}
                       />
                     </div>
 
                     <div className="field">
-                      <label className="field-label">Carpet Area</label>
+                      <label className="field-label">Bastu Info.</label>
                       <input
                         className="field-input"
-                        value={cfg.carpetArea}
+                        value={cfg.bastu_Info}
                         onChange={(e) =>
-                          updateConfig(i, "carpetArea", e.target.value)
+                          updateConfig(i, "bastu_Info", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -568,6 +900,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "bedRoom", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -579,6 +912,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "livingArea", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -590,6 +924,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "kitchen", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -601,6 +936,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "balconies", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -612,6 +948,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "floorHeight", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -623,6 +960,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "flooring", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -634,6 +972,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "facing", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -645,6 +984,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "pricePerArea", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -656,6 +996,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "price", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
 
@@ -668,6 +1009,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         onChange={(e) =>
                           updateConfig(i, "units", e.target.value)
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
                   </div>
@@ -675,7 +1017,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
               ))}
             </div>
 
-            <button className="btn-secondary" onClick={addConfig}>
+            <button className="btn-secondary" onClick={addConfig} disabled={isReadOnly}>
               + Add Configuration
             </button>
           </div>
@@ -708,6 +1050,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                         );
                       }
                     }}
+                    disabled={isReadOnly}
                   />
                   <span>{amenity.name}</span>
                 </label>
@@ -733,21 +1076,76 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
 
         {/* Publish Actions */}
         <div className="publish-row">
-          <button
-            className="btn-gold"
-            onClick={handlePublish}
-            disabled={isPending}
-          >
-            {isPending ? 'Publishing...' : 'Publish Project'}
-          </button>
-          <button className="btn-navy" onClick={handleDraft}>Save as Draft</button>
-          <button className="btn-outline">Preview</button>
+          {mode === 'view' ? (
+            <button className="btn-gold" onClick={() => onEdit?.()}>
+              Edit Project
+            </button>
+          ) : (
+            <>
+              <button
+                className="btn-gold"
+                onClick={handlePublish}
+                disabled={isPending || isUpdating}
+              >
+                {isPending || isUpdating
+                  ? (mode === 'edit' ? 'Saving...' : 'Publishing...')
+                  : (mode === 'edit' ? 'Save Changes' : 'Publish Project')}
+              </button>
+              {mode === 'create' && (
+                <button className="btn-navy" onClick={handleDraft}>Save as Draft</button>
+              )}
+            </>
+          )}
         </div>
 
       </div>
 
       {/* ── RIGHT COLUMN ────────────────────────────────────────────────── */}
       <div className="form-right">
+
+        {mode !== 'create' && (
+          <div className="card">
+            <div className="card-head">Listing Status</div>
+            <div className="card-body">
+              <div className="field">
+                <label className="field-label">Verification</label>
+                <select
+                  className="field-input"
+                  value={isVerified ? 'true' : 'false'}
+                  onChange={(e) => {
+                    const next = e.target.value === 'true';
+                    setIsVerified(next);
+                    saveProjectStatus(
+                      { isVerified: next },
+                      next ? '✅ Project verified' : '✅ Project marked pending'
+                    );
+                  }}
+                >
+                  <option value="false">Pending</option>
+                  <option value="true">Verified</option>
+                </select>
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="field-label">Active</label>
+                <select
+                  className="field-input"
+                  value={isActive ? 'true' : 'false'}
+                  onChange={(e) => {
+                    const next = e.target.value === 'true';
+                    setIsActive(next);
+                    saveProjectStatus(
+                      { isActive: next },
+                      next ? '✅ Project activated' : '✅ Project deactivated'
+                    );
+                  }}
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Image Upload */}
         <div className="card">
@@ -760,6 +1158,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
               multiple
               hidden
               onChange={handleImageChange}
+              disabled={isReadOnly}
             />
             <div className="upload-zone" onClick={() => document.getElementById('img-input')?.click()}>
               <div className="upload-icon">📁</div>
@@ -789,6 +1188,7 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
                       width: 20, height: 20, fontSize: 11,
                       cursor: 'pointer', lineHeight: '20px', padding: 0,
                     }}
+                    disabled={isReadOnly}
                   >✕</button>
                 </div>
               ))}
@@ -811,20 +1211,20 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
               <input className="field-input"
                 placeholder="Samriddh Heights — 2,3 BHK in New Town..."
                 value={formData.metaTitle}
-                onChange={e => update('metaTitle', e.target.value)} />
+                onChange={e => update('metaTitle', e.target.value)} disabled={isReadOnly}/>
             </div>
             <div className="field">
               <label className="field-label">Meta Description</label>
               <textarea className="field-input" rows={3}
                 placeholder="Premium 2 & 3 BHK apartments in New Town..."
                 value={formData.metaDesc}
-                onChange={e => update('metaDesc', e.target.value)} />
+                onChange={e => update('metaDesc', e.target.value)} disabled={isReadOnly}/>
             </div>
             <div className="field">
               <label className="field-label">URL Slug</label>
               <input className="field-input"
                 value={formData.slug || 'samriddh-heights-new-town'}
-                onChange={e => update('slug', e.target.value)} />
+                onChange={e => update('slug', e.target.value)} disabled={isReadOnly}/>
             </div>
           </div>
         </div>
@@ -837,18 +1237,18 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
               <label className="field-label">Lead Email (gets enquiries)</label>
               <input className="field-input"
                 value={formData.leadEmail}
-                onChange={e => update('leadEmail', e.target.value)} />
+                onChange={e => update('leadEmail', e.target.value)} disabled={isReadOnly}/>
             </div>
             <div className="field">
               <label className="field-label">WhatsApp Alert Number</label>
               <input className="field-input"
                 value={formData.whatsappNumber}
-                onChange={e => update('whatsappNumber', e.target.value)} />
+                onChange={e => update('whatsappNumber', e.target.value)} disabled={isReadOnly}/>
             </div>
             <label className="wp-toggle">
               <input type="checkbox"
                 checked={wpAlerts}
-                onChange={() => setWpAlerts(p => !p)} />
+                onChange={() => setWpAlerts(p => !p)} disabled={isReadOnly}/>
               <span>Send WhatsApp alert on new enquiry</span>
             </label>
           </div>
@@ -902,6 +1302,12 @@ export default function AddProjectTab({ onToast }: AddProjectTabProps) {
           color: #8A8A8A;
           font-weight: 600;
           margin-bottom: 6px;
+        }
+        .field-hint {
+          font-size: 12px;
+          color: #6B7280;
+          margin: 0 0 14px;
+          line-height: 1.45;
         }
         .field-input {
           width: 100%;

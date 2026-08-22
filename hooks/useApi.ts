@@ -1,6 +1,8 @@
 import { useQuery, useMutation, UseQueryResult, UseMutationResult } from '@tanstack/react-query'
 import axiosInstance from '@/lib/api/axios'
-import { Property, ApiResponse,GeocodeResponse,ProjectsResponse  } from '@/lib/api/types'
+import { Property, ApiResponse,GeocodeResponse,ProjectsResponse,FeaturedProjectsResponse ,ArticleDetail,ArticlesResponse } from '@/lib/api/types'
+import { fetchDashboardAnalytics } from "@/lib/analyticsApi";
+
 
 // Properties
 export const useProperties = (params?: Record<string, any>): UseQueryResult<Property[], Error> =>
@@ -72,6 +74,52 @@ export const useCreateProject = () =>
     },
   })
 
+export const useUpdateProject = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: number
+      payload: Record<string, unknown>
+    }) => {
+      const { data } = await axiosInstance.patch(`/projects/${id}`, payload)
+      return data
+    },
+  })
+
+export const useVerifyAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      verified,
+    }: {
+      id: number
+      verified: boolean
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}/verify`, {
+        verified,
+      })
+      return data
+    },
+  })
+
+export const useActivateAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      isActive,
+    }: {
+      id: number
+      isActive: boolean
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}/activate`, {
+        isActive,
+      })
+      return data
+    },
+  })
+
 
 
 
@@ -106,11 +154,298 @@ export const useGeocodeLocation = () =>
 
 
  
-export const useProjects = () =>
-  useQuery<ProjectsResponse>({
-    queryKey: ['projects'],
+export const useProjects = (params?: Record<string, any>) =>
+  useQuery({
+    queryKey: ["projects", params],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<ProjectsResponse>('/projects');
+      const { data } = await axiosInstance.get<ProjectsResponse>(
+        "/projects",
+        {
+          params,
+        }
+      );
+
       return data;
     },
   });
+
+
+  export const useFeaturedProjects = (citySlug?: string) =>
+  useQuery({
+    queryKey: ["featured-projects", citySlug],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<FeaturedProjectsResponse>(
+        "/projects/featured",
+        {
+          params: citySlug ? { city: citySlug } : {},
+        }
+      );
+
+      return data.projects;
+    },
+  });
+
+
+  export const useProjectbySlug = (slug: string) =>
+  useQuery({
+    queryKey: ["project", slug],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/projects/${slug}`);
+      return data;
+    },
+    enabled: !!slug,
+  });
+
+
+  export const fetchProjectbyId = (
+  id: string,
+  enabled = true
+) =>
+  useQuery({
+    queryKey: ["project", id],
+    enabled,
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/projects/id/${id}`);
+      return data.data; // return only the project object
+    },
+  });
+
+  export const usePublishedArticles = (params?: Record<string, any>) =>
+  useQuery({
+    queryKey: ['articles', params],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ArticlesResponse>('/articles/public', { params });
+      return data;
+    },
+  });
+
+export const useArticleBySlug = (slug: string) =>
+  useQuery({
+    queryKey: ['article', slug],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ApiResponse<ArticleDetail>>(`/articles/public/${slug}`);
+      return data.data!;
+    },
+    enabled: !!slug,
+  });
+
+export const useCreateArticle = () =>
+  useMutation({
+    mutationFn: async (formData: FormData) => {
+      const { data } = await axiosInstance.post('/articles', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return data;
+    },
+  });
+
+export const usePublishArticle = () =>
+  useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await axiosInstance.post(`/articles/${id}/publish`);
+      return data;
+    },
+  });
+
+export const useArticleCategories = () =>
+  useQuery({
+    queryKey: ['article-categories'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/articles/categories');
+      return data.data as { id: string; name: string; slug: string }[];
+    },
+  });
+
+export const useArticleTags = () =>
+  useQuery({
+    queryKey: ['article-tags'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/articles/tags');
+      return data.data as { id: string; name: string; slug: string }[];
+    },
+  });
+
+
+export function useDashboardAnalytics() {
+  return useQuery({
+    queryKey: ["dashboard-analytics"],
+    queryFn: fetchDashboardAnalytics,
+  });
+}
+
+// ─── Agents ───────────────────────────────────────────────────────────────
+// Add these alongside your existing useCreateProject / fetchProjectbyId in
+// hooks/useApi.ts — same useMutation/useQuery + axiosInstance pattern.
+
+export const useCreateUser = () =>
+  useMutation({
+    mutationFn: async (payload: {
+      phone: string
+      name?: string
+      email?: string
+      role?: 'BUYER' | 'AGENT' | 'ADMIN'
+      agencyName?: string
+      reraNumber?: string
+      licenseUrl?: string
+    }) => {
+      const { data } = await axiosInstance.post('/users', payload)
+      return data
+    },
+  })
+
+export const useCreateAgent = () =>
+  useMutation({
+    mutationFn: async (payload: {
+      phone?: string
+      userId?: number
+      agencyName?: string
+      reraNumber?: string
+    }) => {
+      const { data } = await axiosInstance.post('/agents', payload)
+      return data
+    },
+  })
+
+export const fetchAgentById = (
+  id: string,
+  enabled = true
+) =>
+  useQuery({
+    queryKey: ["agent", id],
+    enabled,
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/agents/${id}`);
+      return data.data; // return only the agent object
+    },
+  });
+
+export const useAgents = (params?: {
+  page?: number
+  limit?: number
+  isVerified?: boolean
+}) =>
+  useQuery({
+    queryKey: ['agents', params],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/agents', { params })
+      return data as {
+        success: boolean
+        data: any[]
+        pagination: {
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }
+    },
+  })
+
+export const useUpdateAgent = () =>
+  useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: number
+      payload: {
+        agencyName?: string
+        reraNumber?: string
+        licenseUrl?: string
+        name?: string
+        email?: string
+      }
+    }) => {
+      const { data } = await axiosInstance.patch(`/agents/${id}`, payload)
+      return data
+    },
+  })
+
+export const useSubmitLead = () =>
+  useMutation({
+    mutationFn: async (payload: {
+      projectId?: number
+      propertyId?: number
+      guestName: string
+      guestPhone: string
+      guestEmail?: string
+      message?: string
+      source?: string
+    }) => {
+      const { data } = await axiosInstance.post('/lead', payload)
+      return data
+    },
+  })
+
+export const useAdminLeads = (
+  params?: {
+    page?: number
+    limit?: number
+    status?: string
+    agentId?: number
+    unassigned?: boolean
+  },
+  enabled = true
+) =>
+  useQuery({
+    queryKey: ['admin-leads', params],
+    enabled,
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/lead', { params })
+      return data as {
+        success: boolean
+        data: any[]
+        pagination: {
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }
+    },
+  })
+
+export const useLeadSummary = () =>
+  useQuery({
+    queryKey: ['lead-summary'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/lead/summary')
+      return data.data
+    },
+  })
+
+export const useAssignLead = () =>
+  useMutation({
+    mutationFn: async ({
+      leadId,
+      agentId,
+    }: {
+      leadId: number
+      agentId: number
+    }) => {
+      const { data } = await axiosInstance.patch(`/lead/${leadId}/assign`, {
+        agentId,
+      })
+      return data
+    },
+  })
+
+export const useUpdateLeadStatus = () =>
+  useMutation({
+    mutationFn: async ({
+      leadId,
+      status,
+    }: {
+      leadId: number
+      status: string
+    }) => {
+      const { data } = await axiosInstance.patch(`/lead/${leadId}/status`, {
+        status,
+      })
+      return data
+    },
+  })

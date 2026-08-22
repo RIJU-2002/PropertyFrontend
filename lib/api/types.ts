@@ -35,7 +35,7 @@ export interface AuthResponse {
     phone: string
     name: string | null
     email: string | null
-    role: "ADMIN" | "BUYER"
+    role: "ADMIN" | "BUYER" | "AGENT"
     avatarUrl: string | null
     isActive: boolean
   }
@@ -54,7 +54,29 @@ export interface GeocodeResponse {
   country: string | null;
 }
 
+export interface Amenity {
+  id: number;
+  name: string;
+  icon: string;
+  category: string;
+}
 
+export interface ProjectAmenity {
+  projectId: number;
+  amenityId: number;
+  amenity: Amenity;
+}
+
+export interface FloorPlan {
+  id: number;
+  bhkType: number;
+  name: string;
+  carpetArea?: number;
+  builtUpArea?: number;
+  superArea?: number;
+  price?: string;
+  imageUrl?: string | null;
+}
 
 
 export interface ProjectConfig {
@@ -62,6 +84,7 @@ export interface ProjectConfig {
   unitType: string;
   buildAreaRange: string;
   carpetArea: string;
+  bastu_Info: string;
   bedRoom: string;
   livingArea: string;
   kitchen: string;
@@ -79,7 +102,18 @@ export interface Project {
   id: number;
   name: string;
   slug: string;
+
+  address: string;
+  description: string;
+  projectType:String;
   possessionStatus: ProjectStats;
+  launchDate:String;
+  possessionDate:string;
+  reraNumber:String;
+  isFeatured: boolean;
+  isVerified: boolean;
+  isTrending: boolean;
+  isNewLaunch: boolean;
 
   city: {
     name: string;
@@ -91,14 +125,21 @@ export interface Project {
     slug: string;
   };
 
-  configs: ProjectConfig[];
-
-  _count: {
-    properties: number;
-    leads: number;
+  builder: {
+    name: string;
+    slug: string;
+    isVerified: boolean;
   };
-}
 
+  images: {
+    id: number;
+    url: string;
+    isCover: boolean;
+  }[];
+  configs: ProjectConfig[];
+  amenities: ProjectAmenity[];
+  floorPlans:FloorPlan[];
+}
 export interface ProjectsResponse {
   success: boolean;
   projects: Project[];
@@ -110,4 +151,54 @@ export interface ProjectsResponse {
     hasNext: boolean;
     hasPrev: boolean;
   };
+}
+
+
+export interface FeaturedProjectsResponse {
+  success: boolean;
+  projects: Project[];
+}
+
+
+
+// ─── Shared article types ─────────────────────────────────────────────────────
+// Import from here in both components and Next.js page files:
+//   import type { ArticleDetail, ArticleSummary } from "@/components/article/article.types";
+
+export interface ArticleCategory {
+  name: string;
+  slug: string;
+}
+
+export interface ArticleTag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+/** Lightweight shape used in listing/grid views */
+export interface ArticleSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  publishedAt: string | null;
+  readTimeMin: number | null;
+  views: number;
+  category: ArticleCategory | null;
+  tags: ArticleTag[];
+}
+export interface ArticlesResponse {
+  articles: ArticleSummary[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+/** Full shape used on the article detail page */
+export interface ArticleDetail extends ArticleSummary {
+  content: string; // HTML string from your rich text editor
 }

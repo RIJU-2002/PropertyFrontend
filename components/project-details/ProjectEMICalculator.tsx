@@ -5,7 +5,7 @@ import styles from "@/app/page.module.css";
 import { calcEmi, fmtINR } from "@/utils/emi";
 
 interface Props {
-  openModal: (name: string) => void;
+  openModal?: (name: string) => void;
 }
 
 export default function ProjectEMICalculator({
@@ -122,7 +122,7 @@ export default function ProjectEMICalculator({
           <button
             className={`${styles.btn} ${styles.btnGold} ${styles.btnFull}`}
             onClick={() =>
-              openModal(
+              openModal?.(
                 "Home Loan Assistance"
               )
             }

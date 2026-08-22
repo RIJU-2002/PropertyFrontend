@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
+import { useParams } from "next/navigation";
+import { useProjectbySlug } from "@/hooks/useApi";
 import ProjectHero from "@/components/project-details/ProjectHero";
 import ProjectProgress from "@/components/project-details/ProjectProgress";
 import ProjectGallery from "@/components/project-details/ProjectGallery";
@@ -14,13 +15,15 @@ import ProjectFloorPlan from "@/components/project-details/ProjectFloorPlan";
 import ProjectLocation from "@/components/project-details/ProjectLocation";
 import ProjectEMICalculator from "@/components/project-details/ProjectEMICalculator";
 import ProjectConstructionUpdates from "@/components/project-details/ProjectConstructionUpdates";
+import ProjectDetailsSkeleton from "@/components/ProjectDetailsSkeleton";
+
 
 import ProjectSidebar from "@/components/project-details/ProjectSidebar";
 import SimilarProjects from "@/components/project-details/SimilarProjects";
 
 import Toast from "@/components/project-details/Toast";
 import EnquiryModal from "@/components/project-details/EnquiryModal";
-import styles from "../page.module.css";
+import styles from "../../page.module.css";
 import { Header } from "@/components/header";
 
 import { PROGRESS_STEPS } from "@/data/projectData";
@@ -65,6 +68,29 @@ export default function ProjectPage() {
       });
   };
 
+  const { slug } = useParams();
+
+  const {
+    data,
+    isLoading,
+  } = useProjectbySlug(slug as string);
+
+  const project = data?.project;
+
+  if (isLoading) {
+  return (
+    <>
+      <Header />
+      <ProjectDetailsSkeleton />
+      <Footer />
+    </>
+  );
+}
+
+  if (!project) {
+    return <div>Project not found.</div>;
+  }
+
   return (
     <>
       <Header />
@@ -73,12 +99,13 @@ export default function ProjectPage() {
       <ProjectHero
         openModal={openModal}
         showToast={showToast}
+        project={project}
       />
       <ProjectProgress
         steps={PROGRESS_STEPS}
       />
 
-      <ProjectGallery />
+      <ProjectGallery project={project} />
 
       <ProjectTabs
         activeTab={activeTab as any}
@@ -87,17 +114,18 @@ export default function ProjectPage() {
       </div>
       <div className={styles.projBody}>
         <main className={styles.projMain}>
-          <ProjectOverview />
+          <ProjectOverview project={project} />
 
-          <ProjectConfigurations />
+          <ProjectConfigurations project={project} />
 
-          <ProjectAmenities />
+          <ProjectAmenities project={project} />
 
           <ProjectFloorPlan
+            project={project}
             showToast={showToast}
           />
 
-          <ProjectLocation />
+          <ProjectLocation project={project}/>
 
           <ProjectEMICalculator
             openModal={openModal}
@@ -108,6 +136,8 @@ export default function ProjectPage() {
 
         <ProjectSidebar
           showToast={showToast}
+          projectId={project.id}
+          projectName={project.name}
         />
       </div>
 
@@ -119,6 +149,8 @@ export default function ProjectPage() {
       {modalOpen && (
         <EnquiryModal
           propName={modalTitle}
+          projectId={project?.id}
+          source="project_details"
           onClose={() =>
             setModalOpen(false)
           }

@@ -73,4 +73,4 @@ export interface DashboardMetric {
   valueColor?: string;
 }
 
-export type CmsTab = 'dashboard' | 'add' | 'enquiries' | 'leads' | 'media';
+export type CmsTab = 'dashboard' | 'add' | 'add_agent' | 'view_agents' | 'edit_agent' | 'view_agent' | 'enquiries' | 'leads' | 'media' | 'blogs' | 'view_blogs' | 'analytics' | 'edit' | 'view';

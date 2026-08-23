@@ -1,14 +1,31 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { SearchBar } from "@/components/search-bar";
 import ProjectCard from "@/components/ProjectCard";
 import { useProjects } from "@/hooks/useApi";
-import { useSavedProjectIds } from "@/hooks/useSavedProjectIds"; // <-- import
+import { useSavedProjectIds } from "@/hooks/useSavedProjectIds";
 import ProjectCardSkeleton from "@/components/ProjectCardSkeleton";
 
-export default function AllProjectsPage() {
+function ProjectsFallback() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="pt-28">
+        <SearchBar />
+      </div>
+      <div className="max-w-7xl mx-auto px-4 pb-10 space-y-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <ProjectCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AllProjectsContent() {
   const searchParams = useSearchParams();
 
   const location = searchParams.get("location") ?? "";
@@ -40,32 +57,13 @@ export default function AllProjectsPage() {
   }
 
   const { data, isLoading: projectsLoading } = useProjects(params);
-  const { savedIds, isLoading: savedLoading } = useSavedProjectIds(); // <-- use hook
+  const { savedIds, isLoading: savedLoading } = useSavedProjectIds();
 
   const projects = data?.projects ?? [];
-
-  // Wait for BOTH to load before showing cards (prevents heart flicker)
   const isLoading = projectsLoading || savedLoading;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="pt-28">
-          <SearchBar
-            initialLocation={location}
-            initialType={type}
-            initialMinPrice={price}
-            initialBedroom={beds}
-          />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 pb-10 space-y-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <ProjectCardSkeleton key={index} />
-          ))}
-        </div>
-      </div>
-    );
+    return <ProjectsFallback />;
   }
 
   return (
@@ -80,7 +78,6 @@ export default function AllProjectsPage() {
         />
       </div>
 
-      {/* Active Filters */}
       {(location || type || price || beds) && (
         <div className="max-w-7xl mx-auto px-4 mb-6">
           <div className="flex flex-wrap gap-2">
@@ -108,7 +105,6 @@ export default function AllProjectsPage() {
         </div>
       )}
 
-      {/* Results Section */}
       <main className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-semibold">Properties ({projects.length})</h1>
@@ -126,12 +122,20 @@ export default function AllProjectsPage() {
               <ProjectCard
                 key={project.id}
                 project={project}
-                initialSaved={savedIds.has(project.id)} // <-- KEY LINE
+                initialSaved={savedIds.has(project.id)}
               />
             ))}
           </div>
         )}
       </main>
     </div>
+  );
+}
+
+export default function AllProjectsPage() {
+  return (
+    <Suspense fallback={<ProjectsFallback />}>
+      <AllProjectsContent />
+    </Suspense>
   );
 }

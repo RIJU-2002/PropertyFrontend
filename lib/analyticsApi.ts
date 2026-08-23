@@ -1,11 +1,8 @@
 import type { DashboardAnalytics } from "@/types/analytics";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:5000";
+import { API_ORIGIN } from "@/lib/apiUrl";
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_ORIGIN}/${path.replace(/^\//, "")}`, {
     next: { revalidate: 60 },
   });
 

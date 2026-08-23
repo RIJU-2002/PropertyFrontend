@@ -1,9 +1,8 @@
 import axios, { AxiosError, AxiosInstance } from 'axios'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+import { API_ORIGIN } from '@/lib/apiUrl'
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_ORIGIN,
   timeout: 10000,
 })
 

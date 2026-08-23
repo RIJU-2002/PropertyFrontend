@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE } from "@/lib/apiUrl";
 import { InvestmentProject } from "@/types/roi";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 interface TopInvestmentProjectsResponse {
   success: boolean;

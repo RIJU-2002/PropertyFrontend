@@ -15,6 +15,7 @@ import Toast from '@/components/cms/Toast';
 import AnalyticsPage from '@/components/analytics/AnalyticsPage';
 import ViewBlogsTab from '@/components/cms/ViewBlogs';
 import type { CmsTab } from '@/types';
+import { API_BASE } from '@/lib/apiUrl';
 
 const DUMMY_CATEGORIES = [
   { id: "cat-1", name: "Market Updates", slug: "market-updates" },
@@ -157,7 +158,7 @@ export default function CmsPage() {
           {activeTab === 'media' && <MediaLibraryTab onToast={showToast} />}
           {activeTab === 'blogs' && (
           <AddArticleTab
-            apiUrl={process.env.NEXT_PUBLIC_API_URL!}
+            apiUrl={API_BASE}
             categories={DUMMY_CATEGORIES}
             tags={DUMMY_TAGS}
             onSaved={(id) => {

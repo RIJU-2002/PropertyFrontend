@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { API_BASE } from '@/lib/apiUrl';
 
 export function useSavedProject(
   projectId: string | number,

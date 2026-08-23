@@ -31,7 +31,7 @@ const COMMERCIAL_TYPES = [
   { label: "Warehouses", href: "/Projects?propertyType=WAREHOUSE", icon: Warehouse },
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/";
+import { API_BASE } from "@/lib/apiUrl"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

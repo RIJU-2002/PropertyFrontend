@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-// Set NEXT_PUBLIC_API_URL in .env for prod (client components need the
-// NEXT_PUBLIC_ prefix to read env vars in the browser).
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/";
+import { API_BASE } from "@/lib/apiUrl";
 
 export interface CitySuggestion {
   id?: string | number;

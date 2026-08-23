@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Project } from "@/lib/api/types";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/";
+import { API_BASE } from "@/lib/apiUrl";
 
 export function useSavedProjects() {
   const [projects, setProjects] = useState<Project[]>([]);

@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/";
+import { API_BASE } from "@/lib/apiUrl";
 
 async function fetchCount(params: Record<string, string>): Promise<number> {
   const searchParams = new URLSearchParams({ ...params, limit: "1", page: "1" });

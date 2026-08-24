@@ -40,7 +40,7 @@ export function FeaturedProperties() {
   const showCards = !projectsLoading && properties.length > 0;
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]">
+    <section className="relative z-0 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]">
       {/* Background pattern */}
       <div
         className="absolute inset-0 pointer-events-none"

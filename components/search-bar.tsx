@@ -32,6 +32,10 @@ const POPULAR_LOCALITIES = [
   "Chandrasekharpur, Bhubaneswar",
 ];
 
+// Property types that don't have a bedroom count — bedroom filter is
+// disabled and reset whenever one of these is selected.
+const NO_BEDROOM_TYPES = ["PLOT", "COMMERCIAL_OFFICE", "COMMERCIAL_SHOP", "WAREHOUSE"];
+
 const container = {
   hidden: {},
   show: {
@@ -106,13 +110,15 @@ export function SearchBar({
   const suggestionLabel = (s: CitySuggestion | string) =>
     typeof s === "string" ? s : s.state ? `${s.name}, ${s.state}` : s.name;
 
+  const bedroomDisabled = NO_BEDROOM_TYPES.includes(propertyType);
+
   // Sync from URL/parent-provided initial values.
   // minPrice/maxPrice arrive in rupees (as set by handleSearch below),
   // so convert back to lakhs for the slider.
   useEffect(() => {
     setLocation(initialLocation);
     setPropertyType(initialType);
-    setBedroom(initialBedroom);
+    setBedroom(NO_BEDROOM_TYPES.includes(initialType) ? "Any" : initialBedroom);
 
     const min = initialMinPrice ? Number(initialMinPrice) / 100000 : PRICE_MIN;
     const max = initialMaxPrice ? Number(initialMaxPrice) / 100000 : PRICE_MAX;
@@ -145,6 +151,7 @@ export function SearchBar({
   }, [openDropdown]);
 
   const handleDropdownToggle = (dropdown: string) => {
+    if (dropdown === "beds" && bedroomDisabled) return;
     setOpenDropdown((prev) => (prev === dropdown ? null : dropdown));
   };
 
@@ -155,13 +162,13 @@ export function SearchBar({
     location.trim() !== "" ||
     propertyType !== "All Types" ||
     !isPriceDefault ||
-    bedroom !== "Any";
+    (bedroom !== "Any" && !bedroomDisabled);
 
   const activeFilterCount = [
     location.trim() !== "",
     propertyType !== "All Types",
     !isPriceDefault,
-    bedroom !== "Any",
+    bedroom !== "Any" && !bedroomDisabled,
   ].filter(Boolean).length;
 
   const clearFilters = () => {
@@ -189,7 +196,7 @@ export function SearchBar({
       params.set("maxPrice", String(price[1] * 100000));
     }
 
-    if (bedroom !== "Any") {
+    if (bedroom !== "Any" && !bedroomDisabled) {
       params.set("bhk", bedroom.replace("+", ""));
     }
 
@@ -238,7 +245,7 @@ export function SearchBar({
   };
 
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 -mt-8">
+    <section className="relative z-30 py-8 px-4 sm:px-6 lg:px-8 -mt-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           ref={wrapperRef}
@@ -401,6 +408,9 @@ export function SearchBar({
                         onClick={() => {
                           setPropertyType(type);
                           setOpenDropdown(null);
+                          if (NO_BEDROOM_TYPES.includes(type)) {
+                            setBedroom("Any");
+                          }
                         }}
                         className={`w-full px-4 py-2 text-left text-foreground hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg ${
                           propertyType === type ? "bg-secondary/60 font-medium" : ""
@@ -480,13 +490,22 @@ export function SearchBar({
                 type="button"
                 aria-haspopup="listbox"
                 aria-expanded={openDropdown === "beds"}
+                aria-disabled={bedroomDisabled}
+                disabled={bedroomDisabled}
                 onClick={() => handleDropdownToggle("beds")}
-                className="w-full flex items-center justify-between px-4 py-3 bg-input border border-border rounded-lg text-foreground"
+                title={bedroomDisabled ? "Not applicable for this property type" : undefined}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-input border border-border rounded-lg text-foreground transition-opacity ${
+                  bedroomDisabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <div className="flex items-center gap-2">
                   <BedDouble className="w-5 h-5 text-muted-foreground shrink-0" />
                   <span>
-                    {bedroom === "Any" ? "Any" : `${bedroom} Bed${bedroom === "1" ? "" : "s"}`}
+                    {bedroomDisabled
+                      ? "N/A"
+                      : bedroom === "Any"
+                      ? "Any"
+                      : `${bedroom} Bed${bedroom === "1" ? "" : "s"}`}
                   </span>
                 </div>
 
@@ -498,7 +517,7 @@ export function SearchBar({
               </button>
 
               <AnimatePresence>
-                {openDropdown === "beds" && (
+                {openDropdown === "beds" && !bedroomDisabled && (
                   <motion.div
                     role="listbox"
                     initial={{ opacity: 0, y: -8 }}

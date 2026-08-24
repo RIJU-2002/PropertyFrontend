@@ -69,7 +69,7 @@ function AllProjectsContent() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-28">
+      <div className="pt-40">
         <SearchBar
           initialLocation={location}
           initialType={type}

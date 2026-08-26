@@ -110,7 +110,7 @@ export function Footer() {
                 <MapPin className="w-5 h-5 text-primary mt-0.5" />
                 <span className="text-muted-foreground">
                   123 Business Avenue, Suite 500<br />
-                  New York, NY 10001
+                  West Bengal, India 10001
                 </span>
               </li>
               <li className="flex items-center gap-3">

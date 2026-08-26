@@ -487,6 +487,15 @@ export function Header() {
                                   Admin Hub
                                 </Link>
                               )}
+                              {user?.role === "AGENT" && (
+                                <Link
+                                  href="/agent"
+                                  className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                                >
+                                  <ShieldCheck className="w-4 h-4" />
+                                  Agent Panel
+                                </Link>
+                              )}
                               <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-left"
@@ -632,6 +641,8 @@ export function Header() {
                   {isAuthenticated ? (
                     user?.role === "ADMIN" ? (
                       <Link href="/cms" onClick={() => setIsMenuOpen(false)}>Admin Hub</Link>
+                    ) : user?.role === "AGENT" ? (
+                      <Link href="/agent" onClick={() => setIsMenuOpen(false)}>Agent Panel</Link>
                     ) : (
                       <Link href="/SavedProp" onClick={() => setIsMenuOpen(false)}>Profile</Link>
                     )

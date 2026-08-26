@@ -61,6 +61,7 @@ export function HeroSection() {
               Find Your{" "}
               <span className="text-primary">Dream Home</span>
               {" "}In{" "}
+              <br/>
               <span className="text-primary">West Bengal</span>
             </motion.h1>
             <motion.p

@@ -173,7 +173,7 @@ export function Header() {
                 literally the same color.
               */}
               <Image
-                src="/images/logo.jpeg"
+                src="/images/logo_bg.png"
                 alt="Samriddh — Your Dream. Our Commitments"
                 width={480}
                 height={480}

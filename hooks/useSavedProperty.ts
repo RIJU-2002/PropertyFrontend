@@ -1,10 +1,14 @@
-import { useState, useCallback } from 'react';
-import { API_BASE } from '@/lib/apiUrl';
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { API_BASE } from "@/lib/apiUrl";
 
 export function useSavedProject(
   projectId: string | number,
   initialSaved: boolean = false
 ) {
+  const router = useRouter();
   const [isSaved, setIsSaved] = useState(initialSaved);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,21 +18,25 @@ export function useSavedProject(
       e?.stopPropagation();
       if (isLoading || !projectId) return;
 
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/auth");
+        return;
+      }
+
       const wasSaved = isSaved;
 
-      // Optimistic update
       setIsSaved(!wasSaved);
       setIsLoading(true);
 
       try {
-        const token = localStorage.getItem('token');
         const res = await fetch(
           `${API_BASE}users/me/saved/projects/${String(projectId)}`,
           {
-            method: 'POST', // ← ALWAYS POST, backend handles toggle
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              ...(token && { Authorization: `Bearer ${token}` }),
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -38,24 +46,16 @@ export function useSavedProject(
           throw new Error(err.message || `HTTP ${res.status}`);
         }
 
-        const data = await res.json(); // { saved: true } or { saved: false }
-        console.log("API_BASE:", API_BASE);
-        console.log("TOKEN:", token);
-        console.log(
-          "URL:",
-          `${API_BASE}users/me/saved/projects`
-        );
-        // Sync with actual backend response
+        const data = await res.json();
         setIsSaved(data.saved);
       } catch (err) {
-        // Revert on error
         setIsSaved(wasSaved);
-        console.error('[toggleSave] Failed:', err);
+        console.error("[toggleSave] Failed:", err);
       } finally {
         setIsLoading(false);
       }
     },
-    [projectId, isSaved, isLoading]
+    [projectId, isSaved, isLoading, router]
   );
 
   return { isSaved, isLoading, toggleSave };

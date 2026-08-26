@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { InvestmentProject } from "@/types/roi";
+import { useSavedProject } from "@/hooks/useSavedProperty";
 
 interface ROIProjectCardProps {
   project: InvestmentProject;
@@ -63,16 +64,10 @@ export default function ROIProjectCard({
     .filter(Boolean)
     .join(", ");
 
-  const [isSaved, setIsSaved] = React.useState(initialSaved);
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setIsSaved((prev) => !prev);
-
-    // Connect your existing save API here later
-  };
+  const { isSaved, isLoading, toggleSave } = useSavedProject(
+    project.id,
+    initialSaved
+  );
 
   return (
     <Link
@@ -101,8 +96,9 @@ export default function ROIProjectCard({
 
             {/* Save */}
             <button
-              onClick={handleSave}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition"
+              onClick={toggleSave}
+              disabled={isLoading}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition disabled:opacity-50"
             >
               <Heart
                 className={`w-5 h-5 ${

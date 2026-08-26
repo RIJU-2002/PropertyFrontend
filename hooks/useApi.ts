@@ -449,3 +449,32 @@ export const useUpdateLeadStatus = () =>
       return data
     },
   })
+
+export const useMyAgentProfile = () =>
+  useQuery({
+    queryKey: ['agent-me'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/agents/me')
+      return data.data
+    },
+  })
+
+export const useMyAgentLeads = (params?: { page?: number; limit?: number; status?: string }) =>
+  useQuery({
+    queryKey: ['agent-me-leads', params],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/agents/me/leads', { params })
+      return data as {
+        success: boolean
+        data: any[]
+        pagination: {
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }
+    },
+  })

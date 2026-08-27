@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMyAgentLeads, useUpdateLeadStatus } from '@/hooks/useApi';
 import StatusBadge from '@/components/cms/StatusBadge';
+import LeadRemarksPanel from '@/components/cms/LeadRemarksPanel';
 
 const LEAD_STATUSES = [
   'NEW',
@@ -26,6 +27,8 @@ export default function AgentLeadsTab() {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState('ALL');
   const [page, setPage] = useState(1);
+  const [expandedLeadId, setExpandedLeadId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const { data, isLoading } = useMyAgentLeads({
     page,
@@ -48,8 +51,15 @@ export default function AgentLeadsTab() {
     []
   );
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2500);
+  };
+
   return (
     <div>
+      {toast ? <div className="toast">{toast}</div> : null}
+
       <div className="tabs">
         {tabs.map((t) => (
           <button
@@ -85,42 +95,64 @@ export default function AgentLeadsTab() {
                   <th>Project / Property</th>
                   <th>Date</th>
                   <th>Status</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead: any) => (
-                  <tr key={lead.id}>
-                    <td><strong>{leadName(lead)}</strong></td>
-                    <td>{leadPhone(lead)}</td>
-                    <td>{lead.project?.name || lead.property?.title || 'General'}</td>
-                    <td>{new Date(lead.createdAt).toLocaleDateString('en-IN')}</td>
-                    <td>
-                      <div className="status-cell">
-                        <StatusBadge status={lead.status} />
-                        <select
-                          value={lead.status}
-                          onChange={(e) => {
-                            updateStatus(
-                              { leadId: lead.id, status: e.target.value },
-                              {
-                                onSuccess: () => {
-                                  queryClient.invalidateQueries({ queryKey: ['agent-me-leads'] });
-                                  queryClient.invalidateQueries({ queryKey: ['agent-me'] });
-                                },
-                              }
-                            );
-                          }}
-                        >
-                          {LEAD_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s.replaceAll('_', ' ')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {leads.map((lead: any) => {
+                  const open = expandedLeadId === lead.id;
+                  return (
+                    <Fragment key={lead.id}>
+                      <tr>
+                        <td><strong>{leadName(lead)}</strong></td>
+                        <td>{leadPhone(lead)}</td>
+                        <td>{lead.project?.name || lead.property?.title || 'General'}</td>
+                        <td>{new Date(lead.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td>
+                          <div className="status-cell">
+                            <StatusBadge status={lead.status} />
+                            <select
+                              value={lead.status}
+                              onChange={(e) => {
+                                updateStatus(
+                                  { leadId: lead.id, status: e.target.value },
+                                  {
+                                    onSuccess: () => {
+                                      queryClient.invalidateQueries({ queryKey: ['agent-me-leads'] });
+                                      queryClient.invalidateQueries({ queryKey: ['agent-me'] });
+                                    },
+                                  }
+                                );
+                              }}
+                            >
+                              {LEAD_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s.replaceAll('_', ' ')}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className={`remarks-toggle ${open ? 'remarks-toggle--open' : ''}`}
+                            onClick={() => setExpandedLeadId(open ? null : lead.id)}
+                          >
+                            {open ? 'Hide' : 'Notes'}
+                          </button>
+                        </td>
+                      </tr>
+                      {open ? (
+                        <tr className="remarks-row">
+                          <td colSpan={6}>
+                            <LeadRemarksPanel leadId={lead.id} onToast={showToast} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -142,6 +174,17 @@ export default function AgentLeadsTab() {
       </div>
 
       <style jsx>{`
+        .toast {
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 50;
+          background: #0d1b2a;
+          color: #fff;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+        }
         .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
         .tab {
           border: 1px solid #f0eae0;
@@ -182,6 +225,25 @@ export default function AgentLeadsTab() {
         th { color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
         .status-cell { display: flex; align-items: center; gap: 8px; }
         select { font-size: 12px; padding: 4px 6px; }
+        .remarks-toggle {
+          border: 1px solid #f0eae0;
+          background: #fff;
+          border-radius: 6px;
+          padding: 5px 10px;
+          font-size: 11px;
+          cursor: pointer;
+          color: #4a4a4a;
+        }
+        .remarks-toggle--open,
+        .remarks-toggle:hover {
+          background: #0d1b2a;
+          color: #fff;
+          border-color: #0d1b2a;
+        }
+        .remarks-row td {
+          padding: 0 !important;
+          border-bottom: 1px solid #f0eae0;
+        }
         .pager {
           display: flex;
           justify-content: space-between;

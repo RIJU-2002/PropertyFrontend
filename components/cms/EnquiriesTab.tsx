@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import StatusBadge from './StatusBadge';
+import LeadRemarksPanel from './LeadRemarksPanel';
 import {
   useAdminLeads,
   useAgents,
@@ -43,6 +44,7 @@ export default function EnquiriesTab({ onToast }: EnquiriesTabProps) {
   const [status, setStatus] = useState<string>('ALL');
   const [agentFilter, setAgentFilter] = useState<string>('ALL');
   const [page, setPage] = useState(1);
+  const [expandedLeadId, setExpandedLeadId] = useState<number | null>(null);
 
   const { data: agentsData } = useAgents({ page: 1, limit: 100 });
   const agents = agentsData?.data ?? [];
@@ -100,22 +102,25 @@ export default function EnquiriesTab({ onToast }: EnquiriesTabProps) {
       <div className="card">
         <div className="card-head">
           All Enquiries
-          <select
-            className="filter"
-            value={agentFilter}
-            onChange={(e) => {
-              setPage(1);
-              setAgentFilter(e.target.value);
-            }}
-          >
-            <option value="ALL">All agents</option>
-            <option value="UNASSIGNED">Unassigned</option>
-            {agents.map((agent: any) => (
-              <option key={agent.id} value={agent.id}>
-                {agent.user?.name || agent.agencyName || `Agent #${agent.id}`}
-              </option>
-            ))}
-          </select>
+          <div className="head-tools">
+            <span className="rr-hint">New enquiries auto-assign round-robin</span>
+            <select
+              className="filter"
+              value={agentFilter}
+              onChange={(e) => {
+                setPage(1);
+                setAgentFilter(e.target.value);
+              }}
+            >
+              <option value="ALL">All agents</option>
+              <option value="UNASSIGNED">Unassigned</option>
+              {agents.map((agent: any) => (
+                <option key={agent.id} value={agent.id}>
+                  {agent.user?.name || agent.agencyName || `Agent #${agent.id}`}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {isLoading ? (
@@ -135,73 +140,102 @@ export default function EnquiriesTab({ onToast }: EnquiriesTabProps) {
                   <th>Date</th>
                   <th>Agent</th>
                   <th>Status</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead: any) => (
-                  <tr key={lead.id}>
-                    <td><strong>{leadName(lead)}</strong></td>
-                    <td>{leadPhone(lead)}</td>
-                    <td>{lead.project?.name || lead.property?.title || 'General'}</td>
-                    <td>{formatBudget(lead.budget)}</td>
-                    <td>{lead.source || '—'}</td>
-                    <td>{new Date(lead.createdAt).toLocaleDateString('en-IN')}</td>
-                    <td>
-                      <select
-                        className="inline-select"
-                        value={lead.agent?.id ?? ''}
-                        onChange={(e) => {
-                          const agentId = Number(e.target.value);
-                          if (!agentId) return;
-                          assignLead(
-                            { leadId: lead.id, agentId },
-                            {
-                              onSuccess: () => {
-                                invalidate();
-                                onToast('✅ Lead assigned');
-                              },
-                              onError: () => onToast('❌ Failed to assign lead'),
+                {leads.map((lead: any) => {
+                  const open = expandedLeadId === lead.id;
+                  return (
+                    <Fragment key={lead.id}>
+                      <tr>
+                        <td><strong>{leadName(lead)}</strong></td>
+                        <td>{leadPhone(lead)}</td>
+                        <td>{lead.project?.name || lead.property?.title || 'General'}</td>
+                        <td>{formatBudget(lead.budget)}</td>
+                        <td>{lead.source || '—'}</td>
+                        <td>{new Date(lead.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td>
+                          <select
+                            className="inline-select"
+                            value={lead.agent?.id ?? ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const agentId = raw === '' ? null : Number(raw);
+                              if (agentId !== null && !agentId) return;
+                              assignLead(
+                                { leadId: lead.id, agentId },
+                                {
+                                  onSuccess: () => {
+                                    invalidate();
+                                    onToast(
+                                      agentId === null
+                                        ? '✅ Lead unassigned'
+                                        : '✅ Lead reassigned'
+                                    );
+                                  },
+                                  onError: () => onToast('❌ Failed to update assignment'),
+                                }
+                              );
+                            }}
+                          >
+                            <option value="">Unassigned</option>
+                            {agents.map((agent: any) => (
+                              <option key={agent.id} value={agent.id}>
+                                {agent.user?.name || agent.agencyName || `Agent #${agent.id}`}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <div className="status-cell">
+                            <StatusBadge status={lead.status} />
+                            <select
+                              className="inline-select"
+                              value={lead.status}
+                              onChange={(e) => {
+                                updateStatus(
+                                  { leadId: lead.id, status: e.target.value },
+                                  {
+                                    onSuccess: () => {
+                                      invalidate();
+                                      onToast('✅ Status updated');
+                                    },
+                                    onError: () => onToast('❌ Failed to update status'),
+                                  }
+                                );
+                              }}
+                            >
+                              {LEAD_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s.replaceAll('_', ' ')}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className={`remarks-toggle ${open ? 'remarks-toggle--open' : ''}`}
+                            onClick={() =>
+                              setExpandedLeadId(open ? null : lead.id)
                             }
-                          );
-                        }}
-                      >
-                        <option value="">Unassigned</option>
-                        {agents.map((agent: any) => (
-                          <option key={agent.id} value={agent.id}>
-                            {agent.user?.name || agent.agencyName || `Agent #${agent.id}`}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <div className="status-cell">
-                        <StatusBadge status={lead.status} />
-                        <select
-                          className="inline-select"
-                          value={lead.status}
-                          onChange={(e) => {
-                            updateStatus(
-                              { leadId: lead.id, status: e.target.value },
-                              {
-                                onSuccess: () => {
-                                  invalidate();
-                                  onToast('✅ Status updated');
-                                },
-                                onError: () => onToast('❌ Failed to update status'),
-                              }
-                            );
-                          }}
-                        >
-                          {LEAD_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s.replaceAll('_', ' ')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          >
+                            {open ? 'Hide' : 'Notes'}
+                          </button>
+                        </td>
+                      </tr>
+                      {open ? (
+                        <tr className="remarks-row">
+                          <td colSpan={9}>
+                            <LeadRemarksPanel leadId={lead.id} onToast={onToast} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -278,6 +312,18 @@ export default function EnquiriesTab({ onToast }: EnquiriesTabProps) {
           justify-content: space-between;
           gap: 12px;
         }
+        .head-tools {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .rr-hint {
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 500;
+          color: #9CA3AF;
+          letter-spacing: 0.02em;
+        }
         .filter, .inline-select {
           padding: 6px 8px;
           border: 1px solid #E5E7EB;
@@ -319,6 +365,29 @@ export default function EnquiriesTab({ onToast }: EnquiriesTabProps) {
           display: flex;
           flex-direction: column;
           gap: 6px;
+        }
+        .remarks-toggle {
+          padding: 5px 10px;
+          border: 1px solid #E5E7EB;
+          border-radius: 4px;
+          background: #fff;
+          font-size: 11px;
+          font-weight: 500;
+          cursor: pointer;
+          font-family: inherit;
+          color: #4A4A4A;
+          white-space: nowrap;
+        }
+        .remarks-toggle:hover,
+        .remarks-toggle--open {
+          background: #0D1B2A;
+          color: #fff;
+          border-color: #0D1B2A;
+        }
+        .remarks-row td {
+          padding: 0 !important;
+          white-space: normal !important;
+          border-bottom: 1px solid #F0EAE0;
         }
         .pager {
           display: flex;

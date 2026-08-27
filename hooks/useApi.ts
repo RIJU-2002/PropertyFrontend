@@ -425,7 +425,7 @@ export const useAssignLead = () =>
       agentId,
     }: {
       leadId: number
-      agentId: number
+      agentId: number | null
     }) => {
       const { data } = await axiosInstance.patch(`/lead/${leadId}/assign`, {
         agentId,
@@ -445,6 +445,42 @@ export const useUpdateLeadStatus = () =>
     }) => {
       const { data } = await axiosInstance.patch(`/lead/${leadId}/status`, {
         status,
+      })
+      return data
+    },
+  })
+
+export const useLeadRemarks = (leadId: number | null, enabled = true) =>
+  useQuery({
+    queryKey: ['lead-remarks', leadId],
+    enabled: enabled && !!leadId,
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/lead/${leadId}/remarks`)
+      return data.data as Array<{
+        id: number
+        body: string
+        createdAt: string
+        author: {
+          id: number
+          name: string | null
+          phone: string | null
+          role: string
+        }
+      }>
+    },
+  })
+
+export const useAddLeadRemark = () =>
+  useMutation({
+    mutationFn: async ({
+      leadId,
+      body,
+    }: {
+      leadId: number
+      body: string
+    }) => {
+      const { data } = await axiosInstance.post(`/lead/${leadId}/remarks`, {
+        body,
       })
       return data
     },

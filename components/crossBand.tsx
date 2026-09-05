@@ -33,7 +33,7 @@ function BandContent() {
  */
 export function CrissCrossBand() {
   return (
-    <div className="relative w-full h-28 md:h-32 overflow-hidden bg-background">
+    <div className="relative w-full h-16 md:h-[4.5rem] overflow-hidden bg-background">
       <div
         className="absolute left-1/2 top-1/2 w-[180%] h-12 -translate-x-1/2 -translate-y-1/2  shadow-[0_6px_24px_rgba(0,0,0,.25)]"
         style={{

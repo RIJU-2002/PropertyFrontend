@@ -163,17 +163,10 @@ function ProjectHero({ project, openModal, showToast }: ProjectHeroProps) {
             onClick={handlePriceClick}
             aria-label={`Get best price for ${project.name}`}
           >
-            Get Best Price
+            Schedule Visit
           </button>
 
           <div className={styles.ctaRow}>
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnOutline}`}
-              onClick={handleSiteVisit}
-            >
-              Schedule Visit
-            </button>
             <button
               type="button"
               className={`${styles.btn} ${styles.btnOutline}`}

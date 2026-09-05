@@ -20,10 +20,8 @@ export default function Home() {
       <SearchBar />
       <FeaturedProperties />
       <CrissCrossBand/>
-      <section id="loan-calculator" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section id="loan-calculator">
         <HomeLoanSection/>
-        </div>
       </section>
       {/* <ArticleGrid
         heading="Latest Insights"

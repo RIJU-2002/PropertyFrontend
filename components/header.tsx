@@ -530,13 +530,24 @@ export function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation — same items as desktop */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-[#C9A84C]/25">
             <nav className="flex flex-col gap-4 text-[15px]">
+              <Link
+                href="/about"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors"
+              >
+                About
+              </Link>
+
               <div>
                 <button
-                  onClick={() => setIsResidentialOpen(!isResidentialOpen)}
+                  onClick={() => {
+                    setIsCommercialOpen(false)
+                    setIsResidentialOpen(!isResidentialOpen)
+                  }}
                   className="flex items-center justify-between w-full text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors"
                 >
                   <span>Residential</span>
@@ -585,7 +596,10 @@ export function Header() {
 
               <div>
                 <button
-                  onClick={() => setIsCommercialOpen(!isCommercialOpen)}
+                  onClick={() => {
+                    setIsResidentialOpen(false)
+                    setIsCommercialOpen(!isCommercialOpen)
+                  }}
                   className="flex items-center justify-between w-full text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors"
                 >
                   <span>Commercial</span>
@@ -625,11 +639,19 @@ export function Header() {
                 </AnimatePresence>
               </div>
 
-              <Link href="/blog" onClick={() => setIsMenuOpen(false)} className="text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors">
-                Blogs
+              <Link
+                href="/roi"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors"
+              >
+                Return on Investment
               </Link>
-              <Link href="#" onClick={() => setIsMenuOpen(false)} className="text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors">
-                About
+              <Link
+                href="/blog"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-[#0D1B2A]/70 hover:text-[#0D1B2A] transition-colors"
+              >
+                Blogs
               </Link>
 
               <div className="flex flex-col gap-2 pt-4 border-t border-[#C9A84C]/25">
@@ -637,28 +659,39 @@ export function Header() {
                   <span className="text-[#0D1B2A]/70 text-sm">Theme</span>
                   <ThemeToggle />
                 </div>
-                <Button variant="ghost" className="justify-start text-[#0D1B2A]/70 hover:text-[#0D1B2A] hover:bg-[#0D1B2A]/5" asChild>
-                  {isAuthenticated ? (
-                    user?.role === "ADMIN" ? (
-                      <Link href="/cms" onClick={() => setIsMenuOpen(false)}>Admin Hub</Link>
-                    ) : user?.role === "AGENT" ? (
-                      <Link href="/agent" onClick={() => setIsMenuOpen(false)}>Agent Panel</Link>
-                    ) : (
-                      <Link href="/SavedProp" onClick={() => setIsMenuOpen(false)}>Profile</Link>
-                    )
-                  ) : (
-                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
-                  )}
-                </Button>
 
-                {isAuthenticated && (
+                {isAuthenticated ? (
+                  <>
+                    <Button variant="ghost" className="justify-start text-[#0D1B2A]/70 hover:text-[#0D1B2A] hover:bg-[#0D1B2A]/5" asChild>
+                      <Link href="/SavedProp" onClick={() => setIsMenuOpen(false)}>
+                        Saved/Liked Properties
+                      </Link>
+                    </Button>
+                    {user?.role === "ADMIN" && (
+                      <Button variant="ghost" className="justify-start text-[#0D1B2A]/70 hover:text-[#0D1B2A] hover:bg-[#0D1B2A]/5" asChild>
+                        <Link href="/cms" onClick={() => setIsMenuOpen(false)}>Admin Hub</Link>
+                      </Button>
+                    )}
+                    {user?.role === "AGENT" && (
+                      <Button variant="ghost" className="justify-start text-[#0D1B2A]/70 hover:text-[#0D1B2A] hover:bg-[#0D1B2A]/5" asChild>
+                        <Link href="/agent" onClick={() => setIsMenuOpen(false)}>Agent Panel</Link>
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                      className="justify-start text-[#0D1B2A]/70 hover:text-destructive gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
                   <Button
-                    variant="ghost"
-                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
-                    className="justify-start text-[#0D1B2A]/70 hover:text-destructive gap-2"
+                    className="bg-[#0D1B2A] text-[#FAF7F2] hover:bg-[#0D1B2A]/90 border border-[#C9A84C]/50"
+                    asChild
                   >
-                    <LogOut className="w-4 h-4" />
-                    Logout
+                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
                   </Button>
                 )}
               </div>

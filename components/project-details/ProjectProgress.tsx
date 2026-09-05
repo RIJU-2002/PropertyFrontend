@@ -28,13 +28,11 @@ export default function ProjectProgress({
       {steps.map((step, index) => (
         <div
           key={index}
-          className={styles.progressStep}
+          className={`${styles.progressStep} ${
+            step.status === "pending" ? styles.pending : ""
+          }`}
         >
-          <div
-            className={getDotClass(
-              step.status
-            )}
-          >
+          <div className={getDotClass(step.status)}>
             {step.status === "done"
               ? "✓"
               : step.status === "active"
@@ -42,7 +40,7 @@ export default function ProjectProgress({
               : "○"}
           </div>
 
-          <div>
+          <div className={styles.stepText}>
             <div className={styles.stepLabel}>
               {step.label}
             </div>

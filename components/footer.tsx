@@ -43,12 +43,12 @@ export function Footer() {
             <h3 className="text-foreground font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-4">
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/Projects" className="text-muted-foreground hover:text-primary transition-colors">
                   Our Properties
                 </Link>
               </li>
@@ -58,7 +58,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
                   Blog & News
                 </Link>
               </li>

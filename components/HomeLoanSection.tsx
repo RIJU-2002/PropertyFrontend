@@ -35,7 +35,7 @@ export default function HomeLoanSection() {
   return (
     <section
       id="home-loan"
-      className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]"
+      className="relative pt-8 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]"
     >
       {/* ── Background: Diagonal hatch pattern (architectural feel) ── */}
       <div

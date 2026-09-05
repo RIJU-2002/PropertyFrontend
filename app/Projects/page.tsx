@@ -31,13 +31,21 @@ function AllProjectsContent() {
   const location = searchParams.get("location") ?? "";
   const type = searchParams.get("propertyType") ?? "";
   const price = searchParams.get("price") ?? "";
+  const minPrice = searchParams.get("minPrice") ?? "";
+  const maxPrice = searchParams.get("maxPrice") ?? "";
   const beds = searchParams.get("bhk") ?? "";
+  const minArea = searchParams.get("minArea") ?? "";
+  const maxArea = searchParams.get("maxArea") ?? "";
 
   const params: Record<string, any> = {};
 
   if (location) params.city = location.toLowerCase();
   if (type) params.propertyType = type;
   if (beds) params.bhk = beds;
+  if (minArea) params.minArea = minArea;
+  if (maxArea) params.maxArea = maxArea;
+  if (minPrice) params.minPrice = minPrice;
+  if (maxPrice) params.maxPrice = maxPrice;
 
   switch (price) {
     case "Under ₹50L":
@@ -72,13 +80,16 @@ function AllProjectsContent() {
       <div className="pt-40">
         <SearchBar
           initialLocation={location}
-          initialType={type}
-          initialMinPrice={price}
-          initialBedroom={beds}
+          initialType={type || "All Types"}
+          initialMinPrice={minPrice}
+          initialMaxPrice={maxPrice}
+          initialBedroom={beds || "Any"}
+          initialMinArea={minArea}
+          initialMaxArea={maxArea}
         />
       </div>
 
-      {(location || type || price || beds) && (
+      {(location || type || price || minPrice || maxPrice || beds || minArea || maxArea) && (
         <div className="max-w-7xl mx-auto px-4 mb-6">
           <div className="flex flex-wrap gap-2">
             {location && (
@@ -94,6 +105,17 @@ function AllProjectsContent() {
             {beds && (
               <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm">
                 🛏️ {beds} BHK
+              </span>
+            )}
+            {(minArea || maxArea) && (
+              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm">
+                📐{" "}
+                {minArea && maxArea
+                  ? `${minArea}–${maxArea}`
+                  : minArea
+                    ? `${minArea}+`
+                    : `Up to ${maxArea}`}{" "}
+                sq ft
               </span>
             )}
             {price && (

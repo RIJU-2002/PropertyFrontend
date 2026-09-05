@@ -13,6 +13,7 @@ import {
   IndianRupee,
   X,
   Loader2,
+  Square,
 } from "lucide-react";
 import PriceSlider, {
   PRICE_MIN,
@@ -32,9 +33,24 @@ const POPULAR_LOCALITIES = [
   "Chandrasekharpur, Bhubaneswar",
 ];
 
-// Property types that don't have a bedroom count — bedroom filter is
-// disabled and reset whenever one of these is selected.
-const NO_BEDROOM_TYPES = ["PLOT", "COMMERCIAL_OFFICE", "COMMERCIAL_SHOP", "WAREHOUSE"];
+// Plots have no bedroom count — bedroom filter is disabled for them.
+const NO_BEDROOM_TYPES = ["PLOT"];
+
+const COMMERCIAL_TYPES = ["COMMERCIAL_OFFICE", "COMMERCIAL_SHOP", "WAREHOUSE"];
+
+const AREA_RANGES = [
+  { label: "Any", min: "", max: "" },
+  { label: "Up to 500", min: "", max: "500" },
+  { label: "500 – 1,000", min: "500", max: "1000" },
+  { label: "1,000 – 2,000", min: "1000", max: "2000" },
+  { label: "2,000 – 5,000", min: "2000", max: "5000" },
+  { label: "5,000+", min: "5000", max: "" },
+] as const;
+
+function areaLabelFromBounds(minArea: string, maxArea: string) {
+  const match = AREA_RANGES.find((r) => r.min === minArea && r.max === maxArea);
+  return match?.label ?? "Any";
+}
 
 const container = {
   hidden: {},
@@ -54,6 +70,8 @@ interface SearchBarProps {
   initialMinPrice?: string;
   initialMaxPrice?: string;
   initialBedroom?: string;
+  initialMinArea?: string;
+  initialMaxArea?: string;
 }
 
 const propertyTypes = [
@@ -87,6 +105,8 @@ export function SearchBar({
   initialMinPrice = "",
   initialMaxPrice = "",
   initialBedroom = "Any",
+  initialMinArea = "",
+  initialMaxArea = "",
 }: SearchBarProps) {
   const router = useRouter();
 
@@ -94,6 +114,7 @@ export function SearchBar({
   const [propertyType, setPropertyType] = useState(initialType);
   const [price, setPrice] = useState<number[]>(DEFAULT_PRICE_RANGE);
   const [bedroom, setBedroom] = useState(initialBedroom);
+  const [area, setArea] = useState(areaLabelFromBounds(initialMinArea, initialMaxArea));
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
@@ -111,6 +132,9 @@ export function SearchBar({
     typeof s === "string" ? s : s.state ? `${s.name}, ${s.state}` : s.name;
 
   const bedroomDisabled = NO_BEDROOM_TYPES.includes(propertyType);
+  const isCommercial = COMMERCIAL_TYPES.includes(propertyType);
+  const selectedArea = AREA_RANGES.find((r) => r.label === area) ?? AREA_RANGES[0];
+  const areaActive = isCommercial && area !== "Any";
 
   // Sync from URL/parent-provided initial values.
   // minPrice/maxPrice arrive in rupees (as set by handleSearch below),
@@ -118,7 +142,12 @@ export function SearchBar({
   useEffect(() => {
     setLocation(initialLocation);
     setPropertyType(initialType);
-    setBedroom(NO_BEDROOM_TYPES.includes(initialType) ? "Any" : initialBedroom);
+    setBedroom(NO_BEDROOM_TYPES.includes(initialType) || COMMERCIAL_TYPES.includes(initialType) ? "Any" : initialBedroom);
+    setArea(
+      COMMERCIAL_TYPES.includes(initialType)
+        ? areaLabelFromBounds(initialMinArea, initialMaxArea)
+        : "Any"
+    );
 
     const min = initialMinPrice ? Number(initialMinPrice) / 100000 : PRICE_MIN;
     const max = initialMaxPrice ? Number(initialMaxPrice) / 100000 : PRICE_MAX;
@@ -127,7 +156,7 @@ export function SearchBar({
       Number.isFinite(min) ? min : PRICE_MIN,
       Number.isFinite(max) ? max : PRICE_MAX,
     ]);
-  }, [initialLocation, initialType, initialMinPrice, initialMaxPrice, initialBedroom]);
+  }, [initialLocation, initialType, initialMinPrice, initialMaxPrice, initialBedroom, initialMinArea, initialMaxArea]);
 
   // Close any open dropdown on outside click or Escape.
   useEffect(() => {
@@ -162,13 +191,15 @@ export function SearchBar({
     location.trim() !== "" ||
     propertyType !== "All Types" ||
     !isPriceDefault ||
-    (bedroom !== "Any" && !bedroomDisabled);
+    (bedroom !== "Any" && !bedroomDisabled && !isCommercial) ||
+    areaActive;
 
   const activeFilterCount = [
     location.trim() !== "",
     propertyType !== "All Types",
     !isPriceDefault,
-    bedroom !== "Any" && !bedroomDisabled,
+    bedroom !== "Any" && !bedroomDisabled && !isCommercial,
+    areaActive,
   ].filter(Boolean).length;
 
   const clearFilters = () => {
@@ -176,6 +207,7 @@ export function SearchBar({
     setPropertyType("All Types");
     setPrice(DEFAULT_PRICE_RANGE);
     setBedroom("Any");
+    setArea("Any");
     setOpenDropdown(null);
     setActiveSuggestion(-1);
   };
@@ -196,8 +228,13 @@ export function SearchBar({
       params.set("maxPrice", String(price[1] * 100000));
     }
 
-    if (bedroom !== "Any" && !bedroomDisabled) {
+    if (bedroom !== "Any" && !bedroomDisabled && !isCommercial) {
       params.set("bhk", bedroom.replace("+", ""));
+    }
+
+    if (areaActive) {
+      if (selectedArea.min) params.set("minArea", selectedArea.min);
+      if (selectedArea.max) params.set("maxArea", selectedArea.max);
     }
 
     setOpenDropdown(null);
@@ -408,8 +445,13 @@ export function SearchBar({
                         onClick={() => {
                           setPropertyType(type);
                           setOpenDropdown(null);
-                          if (NO_BEDROOM_TYPES.includes(type)) {
+                          if (COMMERCIAL_TYPES.includes(type)) {
                             setBedroom("Any");
+                          } else {
+                            setArea("Any");
+                            if (NO_BEDROOM_TYPES.includes(type)) {
+                              setBedroom("Any");
+                            }
                           }
                         }}
                         className={`w-full px-4 py-2 text-left text-foreground hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg ${
@@ -480,7 +522,66 @@ export function SearchBar({
               </AnimatePresence>
             </motion.div>
 
-            {/* Bedrooms */}
+            {isCommercial ? (
+            /* Area (commercial) */
+            <motion.div variants={item} className="relative">
+              <label className="block text-sm text-muted-foreground mb-2">
+                Area (in Sq ft)
+              </label>
+
+              <button
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded={openDropdown === "area"}
+                onClick={() => handleDropdownToggle("area")}
+                className="w-full flex items-center justify-between px-4 py-3 bg-input border border-border rounded-lg text-foreground"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span className="truncate">
+                    {area === "Any" ? "Any" : `${area} sq ft`}
+                  </span>
+                </div>
+
+                <ChevronDown
+                  className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ${
+                    openDropdown === "area" ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {openDropdown === "area" && (
+                  <motion.div
+                    role="listbox"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-20"
+                  >
+                    {AREA_RANGES.map((range) => (
+                      <button
+                        key={range.label}
+                        type="button"
+                        role="option"
+                        aria-selected={area === range.label}
+                        onClick={() => {
+                          setArea(range.label);
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full px-4 py-2 text-left text-foreground hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          area === range.label ? "bg-secondary/60 font-medium" : ""
+                        }`}
+                      >
+                        {range.label === "Any" ? "Any" : `${range.label} sq ft`}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+            ) : (
+            /* Bedrooms */
             <motion.div variants={item} className="relative">
               <label className="block text-sm text-muted-foreground mb-2">
                 Bedrooms
@@ -547,6 +648,7 @@ export function SearchBar({
                 )}
               </AnimatePresence>
             </motion.div>
+            )}
 
             {/* Clear Filters */}
             <motion.div variants={item}>

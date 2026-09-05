@@ -346,7 +346,10 @@
   display: flex;
   align-items: center;
   gap: 0;
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .progressStep {
   display: flex;
@@ -357,14 +360,15 @@
 }
 .progressStep:not(:last-child)::after {
   content: '';
-  flex: 1;
+  flex: 1 1 16px;
   height: 2px;
   background: linear-gradient(90deg, var(--gold) 100%, rgba(255, 255, 255, 0.1) 100%);
   margin-left: 10px;
-  min-width: 20px;
+  min-width: 12px;
+  max-width: none;
 }
 .progressStep.pending:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(201, 168, 76, 0.22);
 }
 .stepDot {
   width: 28px;
@@ -390,19 +394,29 @@
 }
 .stepDotPending {
   background: transparent;
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(201, 168, 76, 0.35);
+  color: var(--muted-foreground);
+}
+.stepText {
+  min-width: 0;
+  flex: 0 1 auto;
 }
 .stepLabel {
   font-size: 10px;
   color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .stepVal {
   font-size: 12px;
   color: var(--foreground);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── GALLERY ── */
@@ -1540,8 +1554,24 @@
     padding: 28px 20px;
   }
   .progressWrap {
-    padding: 14px 20px;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    padding: 16px 20px;
+    overflow: visible;
+  }
+  .progressStep {
+    flex: none;
+    width: 100%;
+  }
+  .progressStep:not(:last-child)::after {
+    display: none;
+  }
+  .stepLabel,
+  .stepVal {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
   .nearbyGrid {
     grid-template-columns: 1fr;
@@ -1550,5 +1580,37 @@
     flex-direction: column;
     gap: 8px;
     text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .progressWrap {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 8px 16px 12px;
+  }
+  .progressStep {
+    position: relative;
+    align-items: flex-start;
+    padding: 10px 0 18px;
+    gap: 12px;
+  }
+  .progressStep:last-child {
+    padding-bottom: 10px;
+  }
+  .progressStep:not(:last-child)::after {
+    display: block;
+    position: absolute;
+    left: 13px;
+    top: 38px;
+    bottom: 0;
+    width: 2px;
+    height: auto;
+    flex: none;
+    min-width: 2px;
+    margin-left: 0;
+    background: var(--gold);
+  }
+  .progressStep.pending:not(:last-child)::after {
+    background: rgba(201, 168, 76, 0.22);
   }
 }

@@ -12,6 +12,15 @@ interface ProjectCardProps {
   initialSaved?: boolean;
 }
 
+function formatPropertyType(type?: string) {
+  if (!type) return "";
+  return type
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export default function ProjectCard({ project, initialSaved = false }: ProjectCardProps) {
   const [isEnquiryOpen, setIsEnquiryOpen] = useState(false); // <-- modal state
   const { isSaved, isLoading, toggleSave } = useSavedProject(project.id, initialSaved);
@@ -62,6 +71,11 @@ export default function ProjectCard({ project, initialSaved = false }: ProjectCa
         <div className="flex-1 p-5 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-3">
+              {project.projectType && (
+                <span className="text-xs font-medium px-3 py-1 rounded-full bg-[#1a2340]/5 text-[#1a2340] border border-[#1a2340]/15">
+                  {formatPropertyType(String(project.projectType))}
+                </span>
+              )}
               <span className={`text-xs font-medium px-3 py-1 rounded-full ${statusColor}`}>
                 {project.possessionStatus}
               </span>

@@ -104,9 +104,11 @@ export function HeroSection() {
                 Explore Properties
               </Button>
               </Link>
+              <Link href="/about">
               <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-secondary">
                 Learn More
               </Button>
+              </Link>
             </motion.div>
           </div>
 

@@ -1,11 +1,13 @@
-// import ArticleGrid from "@/components/blog/ArticleGrid";
+import type { Metadata } from "next";
 import BlogArchive from "@/components/blog/ArticleArchive"
 import { Header } from "@/components/header";
-// export const metadata = {
-//   title: "Blog | Samriddh Realty",
-//   description:
-//     "Real estate insights, guides, and market updates for Odisha and West Bengal.",
-// };
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description:
+    "Real estate insights, guides, and market updates from Samriddh.",
+  alternates: { canonical: "/blog" },
+};
 
 export default function BlogPage() {
   return (

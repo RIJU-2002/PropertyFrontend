@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/hooks/useAuth'
 import { CityProvider } from '@/contexts/city-context'
+import { getSiteUrl } from '@/lib/siteUrl'
 import './globals.css'
 import { Providers } from './providers'
 import FloatingContact from '@/components/floatingComponent'
@@ -21,10 +22,43 @@ const geistMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+const siteUrl = getSiteUrl()
+
 export const metadata: Metadata = {
-  title: 'Samriddh - Your Dream. Our Commitments',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Samriddh - Your Dream. Our Commitments',
+    template: '%s | Samriddh',
+  },
   description: 'Discover premium properties with Samriddh. Your trusted partner for luxury homes, apartments, and commercial spaces.',
-  generator: 'v0.app',
+  applicationName: 'Samriddh',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: siteUrl,
+    siteName: 'Samriddh',
+    title: 'Samriddh - Your Dream. Our Commitments',
+    description: 'Discover premium properties with Samriddh. Your trusted partner for luxury homes, apartments, and commercial spaces.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Samriddh - Your Dream. Our Commitments',
+    description: 'Discover premium properties with Samriddh. Your trusted partner for luxury homes, apartments, and commercial spaces.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   icons: {
     icon: [
       {

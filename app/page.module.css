@@ -34,7 +34,7 @@
 
 @media (max-width: 768px) {
   .pageWrapper {
-    padding-top: 104px;
+    padding-top: 88px;
   }
 
   .pageContainer {
@@ -1507,10 +1507,10 @@
     display: none;
   }
   .tabs {
-    top: 104px;
+    top: 88px;
   }
   .sidebar {
-    top: 146px;
+    top: 128px;
   }
   .projHero {
     padding: 28px 20px 0;
@@ -1522,7 +1522,7 @@
     min-width: 0;
   }
   .projTitle {
-    font-size: 30px;
+    font-size: 24px;
   }
   .tabs {
     padding: 0 20px;

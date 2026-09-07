@@ -29,7 +29,7 @@ const item = {
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-50 pb-20 px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden pt-32 pb-12 sm:pt-40 sm:pb-16 lg:pt-50 lg:pb-20 px-4 sm:px-6 lg:px-8">
       {/* Decorative Background */}
       {/* <div className="absolute top-0 left-0 right-0 h-28 md:h-36 -z-0 pointer-events-none">
         <Image src="/images/apartment_hero_upper.png" alt="" fill priority sizes="100vw" className="object-cover opacity-30 select-none" />
@@ -42,7 +42,7 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <motion.h1
               initial={{ opacity: 0, y: 25 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -51,12 +51,15 @@ export function HeroSection() {
                 duration: 0.6,
               }}
               className="
-              text-5xl
+              text-3xl
+              sm:text-5xl
               lg:text-7xl
               font-semibold
-              leading-[1.05]
+              leading-[1.1]
+              sm:leading-[1.05]
               tracking-[-0.02em]
               text-foreground
+              break-words
             ">
               Find Your{" "}
               <span className="text-primary">Dream Home</span>
@@ -72,7 +75,7 @@ export function HeroSection() {
                 delay: 0.2,
                 duration: 0.6,
               }}
-              className="text-lg text-muted-foreground max-w-xl leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed"
             >
               Samriddh Realty brings you the finest curated properties — from luxury apartments to affordable homes — with complete transparency and zero hidden charges.
             </motion.p>
@@ -84,12 +87,14 @@ export function HeroSection() {
                 delay: 0.35,
                 duration: 0.6,
               }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
             >
-              <Link href="/Projects">
+              <Link href="/Projects" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 className="
+                  w-full
+                  sm:w-auto
                   bg-primary
                   text-primary-foreground
                   text-bold
@@ -104,8 +109,8 @@ export function HeroSection() {
                 Explore Properties
               </Button>
               </Link>
-              <Link href="/about">
-              <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-secondary">
+              <Link href="/about" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-border text-foreground hover:bg-secondary">
                 Learn More
               </Button>
               </Link>
@@ -167,7 +172,7 @@ export function HeroSection() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-2 gap-3 sm:gap-4"
           >
               {/* <motion.div 
                 variants={item}

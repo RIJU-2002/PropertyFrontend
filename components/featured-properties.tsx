@@ -40,7 +40,7 @@ export function FeaturedProperties() {
   const showCards = !projectsLoading && properties.length > 0;
 
   return (
-    <section className="relative z-0 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]">
+    <section className="relative z-0 py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]">
       {/* Background pattern */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -71,7 +71,7 @@ export function FeaturedProperties() {
                 Featured Properties
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-semibold text-[#0D1B2A]">
+            <h2 className="text-2xl sm:text-4xl font-semibold text-[#0D1B2A]">
               Our Best Options
             </h2>
             <p className="text-[#5C4A2E] mt-2 max-w-xl">
@@ -82,7 +82,7 @@ export function FeaturedProperties() {
             <Link href="/Projects" className="self-start sm:self-auto">
               <Button
                 variant="outline"
-                className="group h-12 rounded-full px-7 border-2 border-[#D4AF37]/30 bg-white/80 backdrop-blur-md text-[#8B6914] font-semibold hover:bg-[#D4AF37] hover:text-white hover:border-[#D4AF37] transition-all duration-300 hover:shadow-[0_10px_30px_rgba(212,175,55,0.25)] hover:-translate-y-0.5"
+                className="group h-11 sm:h-12 w-full sm:w-auto rounded-full px-7 border-2 border-[#D4AF37]/30 bg-white/80 backdrop-blur-md text-[#8B6914] font-semibold hover:bg-[#D4AF37] hover:text-white hover:border-[#D4AF37] transition-all duration-300 hover:shadow-[0_10px_30px_rgba(212,175,55,0.25)] hover:-translate-y-0.5"
               >
                 Explore Properties
                 <ArrowRight className="ml-2 h-4 w-4 transition-all duration-300 group-hover:translate-x-1" />

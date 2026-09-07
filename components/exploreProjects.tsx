@@ -214,7 +214,7 @@ export function ExploreProjects() {
   };
 
   return (
-    <section className="relative py-16 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: "#F3EFE4" }}>
+    <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: "#F3EFE4" }}>
       {/* faint drafting-grid backdrop, evokes a blueprint sheet, kept very subtle on light ground */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.035]"
@@ -234,7 +234,7 @@ export function ExploreProjects() {
                 Browse by
               </span>
             </div>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-foreground leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-[-0.03em] text-foreground leading-tight">
               Explore Projects
             </h2>
           </div>
@@ -243,7 +243,7 @@ export function ExploreProjects() {
         <div
           role="tablist"
           aria-label="Explore projects by"
-          className="flex gap-8 sm:gap-10 border-b mb-12  pt-10"
+          className="flex gap-6 sm:gap-10 border-b mb-8 sm:mb-12 pt-8 sm:pt-10 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ borderColor: "rgba(184,134,62,0.25)" }}
         >
           {TABS.map((tab) => (
@@ -252,7 +252,7 @@ export function ExploreProjects() {
               role="tab"
               aria-selected={activeTab === tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className="relative pb-4 text-sm sm:text-base whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8863E]/50 rounded-t"
+              className="relative pb-4 text-sm sm:text-base whitespace-nowrap shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8863E]/50 rounded-t"
               style={{
                 color: activeTab === tab.key ? "#1A1A1A" : "rgba(26,26,26,0.4)",
               }}

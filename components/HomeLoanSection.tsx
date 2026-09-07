@@ -35,7 +35,7 @@ export default function HomeLoanSection() {
   return (
     <section
       id="home-loan"
-      className="relative pt-8 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]"
+      className="relative pt-6 pb-12 sm:pt-8 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FAF7F2]"
     >
       {/* ── Background: Diagonal hatch pattern (architectural feel) ── */}
       <div
@@ -76,17 +76,17 @@ export default function HomeLoanSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-16"
         >
           <span className="inline-block px-4 py-1.5 mb-4 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#C9A84C] bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.22)] rounded-full">
             Financial Planning
           </span>
 
-          <h2 className="font-serif text-4xl sm:text-5xl font-semibold text-[#0D1B2A] mb-5 leading-tight">
+          <h2 className="font-serif text-3xl sm:text-5xl font-semibold text-[#0D1B2A] mb-4 sm:mb-5 leading-tight">
             Plan Your Dream Home
           </h2>
 
-          <p className="text-lg text-[#5C4A2E] max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-[#5C4A2E] max-w-2xl mx-auto leading-relaxed px-1">
             Calculate your EMIs in seconds and explore tailored home loan options
             that align with your budget. Zero paperwork, instant estimates.
           </p>
@@ -109,7 +109,7 @@ export default function HomeLoanSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.08 * idx }}
-                className="flex items-start gap-4 p-5 rounded-xl bg-white/70 backdrop-blur-md border border-[rgba(13,27,42,0.06)] shadow-sm hover:shadow-md transition-all duration-300"
+                className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl bg-white/70 backdrop-blur-md border border-[rgba(13,27,42,0.06)] shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#8B6F2E] text-white shadow-sm">
                   <item.icon className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function HomeLoanSection() {
                 </div>
 
                 {/* Calculator Body */}
-                <div className="p-6 sm:p-8">
+                <div className="p-4 sm:p-8">
                   <ProjectEMICalculator
                     openModal={() => setOpen(true)}
                   />

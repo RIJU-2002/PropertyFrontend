@@ -13,7 +13,7 @@ export function ArticleCards() {
   const articles = data?.articles ?? [];
 
   return (
-    <section className="relative isolate overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
+    <section className="relative isolate overflow-hidden py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
 
       {/* ---------- BACKGROUND ---------- */}
 
@@ -138,7 +138,7 @@ export function ArticleCards() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
 
           <div>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-foreground leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-[-0.03em] text-foreground leading-tight">
               Latest Insights
             </h2>
 

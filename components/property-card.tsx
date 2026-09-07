@@ -289,14 +289,14 @@ export function PropertyCard({
           {configs.map((config) => (
             <div
               key={config.unitType}
-              className="flex items-center justify-between text-sm border rounded-lg px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm border rounded-lg px-3 py-2 min-w-0"
             >
-              <div className="flex items-center gap-2">
-                <BedDouble className="w-4 h-4 text-primary" />
-                <span className="font-medium">{config.unitType}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <BedDouble className="w-4 h-4 text-primary shrink-0" />
+                <span className="font-medium truncate">{config.unitType}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Square className="w-4 h-4" />
+                <Square className="w-4 h-4 shrink-0" />
                 <span>{config.buildAreaRange} sqft</span>
               </div>
               <div className="font-semibold text-primary">
@@ -306,17 +306,17 @@ export function PropertyCard({
           ))}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <div>
-            <span className="text-2xl font-semibold text-primary">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-border">
+          <div className="min-w-0">
+            <span className="text-xl sm:text-2xl font-semibold text-primary break-words">
               {startingPrice ? `₹${startingPrice.toLocaleString()}` : "Price on Request"}
             </span>
             {startingPrice && (
               <span className="text-muted-foreground text-sm ml-1">onwards</span>
             )}
           </div>
-          <Link href={`/Projects/${slug}`}>
-            <Button variant="outline" className="border-border text-foreground hover:bg-secondary">
+          <Link href={`/Projects/${slug}`} className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto border-border text-foreground hover:bg-secondary">
               View Details
             </Button>
           </Link>

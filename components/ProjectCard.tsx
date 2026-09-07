@@ -87,8 +87,8 @@ export default function ProjectCard({ project, initialSaved = false }: ProjectCa
               )}
             </div>
 
-            <div className="flex items-start justify-between gap-4 mb-1">
-              <h2 className="text-2xl font-semibold text-gray-900 leading-tight">{project.name}</h2>
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight break-words">{project.name}</h2>
               <div className="text-right shrink-0">
                 {project.reraNumber && (
                   <p className="text-[11px] text-gray-400 mt-0.5">RERA ID: {project.reraNumber}</p>
@@ -110,7 +110,7 @@ export default function ProjectCard({ project, initialSaved = false }: ProjectCa
             {project.configs.length > 0 && (
               <div className="mb-4 pb-4 border-b border-gray-100">
                 {project.configs.map((config) => (
-                  <p key={config.id} className="text-sm text-gray-700 mb-2">
+                  <p key={config.id} className="text-sm text-gray-700 mb-2 break-words">
                     <span className="font-semibold">{config.unitType}</span>
                     {" • "}
                     {config.buildAreaRange} sq.ft.
@@ -136,7 +136,7 @@ export default function ProjectCard({ project, initialSaved = false }: ProjectCa
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex gap-3 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <Link
               href={`/Projects/${project.slug}`}
               className="flex-1 py-2.5 rounded-full border-2 border-[#1a2340] text-[#1a2340] font-semibold text-sm hover:bg-[#1a2340] hover:text-white transition-colors duration-200 text-center"

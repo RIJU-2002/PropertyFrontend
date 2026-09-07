@@ -282,7 +282,7 @@ export function SearchBar({
   };
 
   return (
-    <section className="relative z-30 py-8 px-4 sm:px-6 lg:px-8 -mt-8">
+    <section className="relative z-30 py-4 sm:py-8 px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           ref={wrapperRef}
@@ -291,7 +291,7 @@ export function SearchBar({
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           whileHover={{ y: -3, transition: { duration: 0.2 } }}
-          className="bg-card border border-border rounded-2xl p-6 shadow-xl"
+          className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-xl"
         >
           {/* Search Fields */}
           <motion.div
@@ -505,8 +505,8 @@ export function SearchBar({
                       top-full
                       left-0
                       mt-2
-                      w-[calc(100vw-3rem)]
-                      max-w-80
+                      w-full
+                      max-w-[min(20rem,calc(100vw-2rem))]
                       rounded-2xl
                       border
                       border-border

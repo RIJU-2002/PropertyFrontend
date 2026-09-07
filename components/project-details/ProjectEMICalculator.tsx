@@ -135,23 +135,17 @@ export default function ProjectEMICalculator({
           >
             <div className={styles.emiRow}>
               <span>Principal</span>
-              <span>
-                {fmtINR(loanAmt)}
-              </span>
+              <span>{fmtINR(loanAmt)}</span>
             </div>
 
             <div className={styles.emiRow}>
               <span>Interest</span>
-              <span>
-                {fmtINR(interest)}
-              </span>
+              <span>{fmtINR(interest)}</span>
             </div>
 
-            <div className={styles.emiRow}>
+            <div className={`${styles.emiRow} ${styles.emiRowGold}`}>
               <span>Total</span>
-              <span>
-                {fmtINR(total)}
-              </span>
+              <span>{fmtINR(total)}</span>
             </div>
           </div>
         </div>

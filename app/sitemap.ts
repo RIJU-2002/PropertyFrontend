@@ -53,11 +53,11 @@ async function fetchPagedSlugs(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = getSiteUrl();
+  const siteUrl = getSiteUrl().replace(/\/+$/, "");
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: siteUrl, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${siteUrl}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
     {
       url: `${siteUrl}/Projects`,
       lastModified: now,

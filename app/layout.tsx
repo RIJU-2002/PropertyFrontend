@@ -32,9 +32,6 @@ export const metadata: Metadata = {
   },
   description: 'Discover premium properties with Samriddh. Your trusted partner for luxury homes, apartments, and commercial spaces.',
   applicationName: 'Samriddh',
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
     type: 'website',
     locale: 'en_IN',

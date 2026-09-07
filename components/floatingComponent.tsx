@@ -55,7 +55,7 @@ export default function FloatingContact({
   return (
     <>
       {/* Floating Actions */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3">
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -96,7 +96,7 @@ export default function FloatingContact({
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
           className={`
-            w-14 h-14 rounded-full shadow-2xl flex items-center justify-center
+            w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-2xl flex items-center justify-center
             transition-all duration-300
             ${isOpen 
               ? "bg-red-500 hover:bg-red-600 text-white rotate-0" 

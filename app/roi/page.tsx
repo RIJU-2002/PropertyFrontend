@@ -25,7 +25,7 @@ export default function ROIPage() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <main className="max-w-7xl mx-auto px-4 pt-[104px] md:pt-[136px] pb-10">
+        <main className="max-w-7xl mx-auto px-4 pt-[88px] md:pt-[136px] pb-10">
           <div className="mb-8">
             <div className="h-9 w-72 bg-muted animate-pulse rounded-md" />
             <div className="h-5 w-96 bg-muted animate-pulse rounded-md mt-3" />
@@ -46,7 +46,7 @@ export default function ROIPage() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <main className="max-w-7xl mx-auto px-4 pt-[104px] md:pt-[136px] pb-10">
+        <main className="max-w-7xl mx-auto px-4 pt-[88px] md:pt-[136px] pb-10">
           <div className="text-center py-20">
             <div className="text-6xl mb-4">⚠️</div>
 
@@ -67,10 +67,10 @@ export default function ROIPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 pt-[104px] md:pt-[136px] pb-10">
+      <main className="max-w-7xl mx-auto px-4 pt-[88px] md:pt-[136px] pb-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold">
+          <h1 className="text-2xl sm:text-3xl font-semibold">
             Top Investment Projects
           </h1>
 

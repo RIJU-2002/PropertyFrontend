@@ -87,7 +87,7 @@ export default function EnquiryModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4"
         onClick={onClose}
       >
         <motion.div
@@ -95,7 +95,7 @@ export default function EnquiryModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+          className="relative w-full sm:max-w-md max-h-[92dvh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

@@ -43,7 +43,7 @@ export function StatCard({
       whileHover={{
         scale: 1.04,
       }}
-      className="bg-card border border-border rounded-xl p-6 space-y-3 shadow-sm"
+      className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-3 shadow-sm min-w-0"
     >
       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
         {icon}
@@ -51,7 +51,7 @@ export function StatCard({
 
       <AnimatedNumber value={value} suffix={suffix} />
 
-      <div className="text-muted-foreground">
+      <div className="text-muted-foreground text-sm sm:text-base leading-snug">
         {label}
       </div>
     </motion.div>

@@ -16,10 +16,10 @@ export default function SavedProjectsPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 pt-24 pb-10">
+      <main className="max-w-7xl mx-auto px-4 pt-28 md:pt-[136px] pb-10">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-3">
             <Heart className="w-8 h-8 text-red-500 fill-red-500" />
             Saved Projects
           </h1>

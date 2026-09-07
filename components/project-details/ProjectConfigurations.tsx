@@ -62,76 +62,52 @@ const selected = configs[activeConfig];
               ))}
               </div>
 
-              <table
-                className={styles.specTable}
-              >
-                <tbody>
-                  {selected && (
-          <table className={styles.specTable}>
-            <tbody>
-              {/* <tr>
-                <td>Unit Type</td>
-                <td>{selected.unitType}</td>
-              </tr> */}
-
-              <tr>
-                <td>Build Area</td>
-                <td>{selected.buildAreaRange}</td>
-              </tr>
-
-              {/* <tr>
-                <td>Carpet Area</td>
-                <td>{selected.carpetArea}</td>
-              </tr> */}
-              <tr>
-                <td>Bastu Info</td>
-                <td>{selected.bastu_Info}</td>
-              </tr>
-
-              <tr>
-                <td>Bedrooms</td>
-                <td>{selected.bedRoom}</td>
-              </tr>
-
-              <tr>
-                <td>Living Area</td>
-                <td>{selected.livingArea}</td>
-              </tr>
-
-              <tr>
-                <td>Kitchen</td>
-                <td>{selected.kitchen}</td>
-              </tr>
-
-              <tr>
-                <td>Balconies</td>
-                <td>{selected.balconies}</td>
-              </tr>
-
-              {/* <tr>
-                <td>Floor Height</td>
-                <td>{selected.floorHeight}</td>
-              </tr> */}
-
-              <tr>
-                <td>Flooring</td>
-                <td>{selected.flooring}</td>
-              </tr>
-
-              <tr>
-                <td>Facing</td>
-                <td>{selected.facing}</td>
-              </tr>
-
-              <tr>
-                <td>Price / Area</td>
-                <td>{selected.pricePerArea}</td>
-              </tr>
-            </tbody>
-          </table>
-        )}
-        </tbody>
-      </table>
+      {selected ? (
+        <table className={styles.specTable}>
+          <tbody>
+            <tr>
+              <td>Build Area</td>
+              <td>{selected.buildAreaRange}</td>
+            </tr>
+            <tr>
+              <td>Bastu Info</td>
+              <td>{selected.bastu_Info}</td>
+            </tr>
+            <tr>
+              <td>Bedrooms</td>
+              <td>{selected.bedRoom}</td>
+            </tr>
+            <tr>
+              <td>Living Area</td>
+              <td>{selected.livingArea}</td>
+            </tr>
+            <tr>
+              <td>Kitchen</td>
+              <td>{selected.kitchen}</td>
+            </tr>
+            <tr>
+              <td>Balconies</td>
+              <td>{selected.balconies}</td>
+            </tr>
+            <tr>
+              <td>Flooring</td>
+              <td>{selected.flooring}</td>
+            </tr>
+            <tr>
+              <td>Facing</td>
+              <td>{selected.facing}</td>
+            </tr>
+            <tr>
+              <td>Price / Area</td>
+              <td>{selected.pricePerArea}</td>
+            </tr>
+          </tbody>
+        </table>
+      ) : (
+        <p style={{ padding: "16px 22px", color: "#8A8A8A", fontSize: 13 }}>
+          No configuration details available.
+        </p>
+      )}
     </section>
   );
 }

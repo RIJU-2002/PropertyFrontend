@@ -417,7 +417,7 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .blogSection {
-    padding-top: 104px;
+    padding-top: 88px;
   }
 
   .hero {

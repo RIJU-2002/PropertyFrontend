@@ -159,7 +159,7 @@ export function Header() {
       className="fixed top-0 left-0 right-0 z-50 isolate bg-[#FAF7F2] border-b border-[#C9A84C]/25 shadow-[0_10px_40px_rgba(15,23,42,0.08)]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[104px] md:h-[136px]">
+        <div className="flex items-center justify-between h-[88px] md:h-[136px] gap-3">
           <div className="flex items-center gap-4 md:gap-6 min-w-0">
             <Link
               href="/"
@@ -178,7 +178,7 @@ export function Header() {
                 width={480}
                 height={480}
                 priority
-                className="h-[84px] w-auto object-contain object-center transition-transform duration-300 hover:scale-[1.03] md:h-[120px]"
+                className="h-16 w-auto max-w-[min(220px,58vw)] object-contain object-center transition-transform duration-300 hover:scale-[1.03] md:h-[120px] md:max-w-none"
               />
             </Link>
             <span
@@ -523,7 +523,8 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-[#0D1B2A]"
+            className="md:hidden shrink-0 p-2 -mr-1 text-[#0D1B2A]"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -532,7 +533,7 @@ export function Header() {
 
         {/* Mobile Navigation — same items as desktop */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-[#C9A84C]/25">
+          <div className="md:hidden py-4 border-t border-[#C9A84C]/25 max-h-[min(70vh,calc(100dvh-88px))] overflow-y-auto overscroll-contain">
             <nav className="flex flex-col gap-4 text-[15px]">
               <Link
                 href="/about"

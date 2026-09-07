@@ -13,7 +13,7 @@ function ProjectsFallback() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-28">
+      <div className="pt-28 md:pt-40">
         <SearchBar />
       </div>
       <div className="max-w-7xl mx-auto px-4 pb-10 space-y-6">
@@ -77,7 +77,7 @@ function AllProjectsContent() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-40">
+      <div className="pt-28 md:pt-40">
         <SearchBar
           initialLocation={location}
           initialType={type || "All Types"}
@@ -129,7 +129,7 @@ function AllProjectsContent() {
 
       <main className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-semibold">Properties ({projects.length})</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">Properties ({projects.length})</h1>
         </div>
 
         {projects.length === 0 ? (

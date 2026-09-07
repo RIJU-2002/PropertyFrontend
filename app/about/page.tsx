@@ -109,7 +109,7 @@ export default function AboutPage() {
       {/* ═══════════════════════════════════════
           HERO
       ═══════════════════════════════════════ */}
-      <section className="relative pt-50 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-32 pb-12 sm:pt-40 sm:pb-20 lg:pt-50 px-4 sm:px-6 lg:px-8 overflow-hidden">
   <div className="absolute inset-0 bg-[#FAF7F2] -z-10" />
 
   <div
